@@ -56,43 +56,85 @@ public class Node extends Spatial {
 		return children;
 	}
 	
-	public void updateBound() {
+	/**
+	 * Updates the model bound for all leafs to this node.
+	 */
+	@Override
+	public void updateModelBound() {
+		int len = children.size();	
+		for(int i = 0; i < len; i++) {
+			children.get(i).updateModelBound();;
+		}
+	}
+	
+	@Override
+	public void updateWorldBound(boolean propagate) {
 		int len = children.size();
 		Spatial child;
 		AABBox cBound;
 		
-		bound.minX = bound.maxX = 0;
-		bound.minY = bound.maxY = 0;
-		bound.minZ = bound.maxZ = 0;
+		worldBound.minX = worldBound.maxX = 0;
+		worldBound.minY = worldBound.maxY = 0;
+		worldBound.minZ = worldBound.maxZ = 0;
 		
 		for(int i = 0; i < len; i++) {
 			child = children.get(i);
-			child.updateBound();
-			cBound = child.getBound();
+			child.updateWorldBound(false);
+			cBound = child.getWorldBound();
 			
 			if(i == 0) {
-				bound.minX = cBound.minX;
-				bound.minY = cBound.minY;
-				bound.minZ = cBound.minZ;
-				bound.maxX = cBound.maxX;
-				bound.maxY = cBound.maxY;
-				bound.maxZ = cBound.maxZ;
+				worldBound.minX = cBound.minX;
+				worldBound.minY = cBound.minY;
+				worldBound.minZ = cBound.minZ;
+				worldBound.maxX = cBound.maxX;
+				worldBound.maxY = cBound.maxY;
+				worldBound.maxZ = cBound.maxZ;
 			} else {
-				if(cBound.minX < bound.minX)
-					bound.minX = cBound.minX;
-				if(cBound.minY < bound.minY)
-					bound.minY = cBound.minY;
-				if(cBound.minZ < bound.minY)
-					bound.minZ = cBound.minZ;
-				if(cBound.maxX > bound.maxX)
-					bound.maxX = cBound.maxX;
-				if(cBound.maxY > bound.maxY)
-					bound.maxY = cBound.maxY;
-				if(cBound.maxZ > bound.maxZ)
-					bound.maxZ = cBound.maxZ;
+				if(cBound.minX < worldBound.minX)
+					worldBound.minX = cBound.minX;
+				if(cBound.minY < worldBound.minY)
+					worldBound.minY = cBound.minY;
+				if(cBound.minZ < worldBound.minY)
+					worldBound.minZ = cBound.minZ;
+				if(cBound.maxX > worldBound.maxX)
+					worldBound.maxX = cBound.maxX;
+				if(cBound.maxY > worldBound.maxY)
+					worldBound.maxY = cBound.maxY;
+				if(cBound.maxZ > worldBound.maxZ)
+					worldBound.maxZ = cBound.maxZ;
 			}
 		}
-		bound.transform(transM);
+		worldBound.transform(transM);
+		
+		if(propagate && parent != null) {
+			parent.updateWorldBound(this);
+		}
+	}
+	
+	/**
+	 * Updates the world bound for this node based on the
+	 * world bound of the calling child and propagate the changes up 
+	 * to the root
+	 * @param caller the spatial which world bound has changed 
+	 */
+	protected void updateWorldBound(Spatial child) {
+		AABBox cBound = child.getWorldBound();
+		if(cBound.minX < worldBound.minX)
+			worldBound.minX = cBound.minX;
+		if(cBound.minY < worldBound.minY)
+			worldBound.minY = cBound.minY;
+		if(cBound.minZ < worldBound.minY)
+			worldBound.minZ = cBound.minZ;
+		if(cBound.maxX > worldBound.maxX)
+			worldBound.maxX = cBound.maxX;
+		if(cBound.maxY > worldBound.maxY)
+			worldBound.maxY = cBound.maxY;
+		if(cBound.maxZ > worldBound.maxZ)
+			worldBound.maxZ = cBound.maxZ;
+		
+		if(parent != null) {
+			parent.updateWorldBound(this);
+		}
 	}
 	
 	/**
@@ -115,7 +157,7 @@ public class Node extends Spatial {
 			return;
 		}
 		
-		if(ray.intersects(bound)) {
+		if(ray.intersects(worldBound)) {
 			int len = children.size();
 			for(int i = 0; i < len; i++) {
 				children.get(i).calculatePick(ray, result);

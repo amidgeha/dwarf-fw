@@ -7,6 +7,7 @@ import se.ltu.android.demo.intersection.PickResult;
 import se.ltu.android.demo.intersection.Ray;
 import se.ltu.android.demo.scene.Node;
 import se.ltu.android.demo.scene.Spatial;
+import se.ltu.android.demo.scene.TriMesh;
 import se.ltu.android.demo.scene.shapes.*;
 import se.ltu.android.demo.util.GLColor;
 
@@ -25,7 +26,7 @@ public class DemoGameThread extends Thread {
 	private DemoGLSurfaceView mGLView;
 	private boolean isRunning = true;
 	private boolean isPaused = false;
-	private Box pickedBox;
+	private TriMesh pickedMesh;
 	private Box box;
 
 	public DemoGameThread(DemoGLSurfaceView glview) {
@@ -86,13 +87,15 @@ public class DemoGameThread extends Thread {
 					box.detachFromParent();
 				}
 				box = null;
-				if(spatial instanceof Box) {
-					pickedBox = (Box)spatial;
-					AABBox bound = pickedBox.getBound();
+				if(spatial instanceof TriMesh) {
+					pickedMesh = (TriMesh)spatial;
+					AABBox bound = pickedMesh.getWorldBound();
 					box = new Box("bounding", bound.minX, bound.minY, bound.minZ, bound.maxX, bound.maxY, bound.maxZ);
 					//box.setTransform(pickedBox.getTransform());
 					world.attachChild(box);
 				}
+			} else {
+				Log.d(TAG, "Picked none!");
 			}
 		}
 	}
@@ -149,7 +152,7 @@ public class DemoGameThread extends Thread {
     		
     	quad = new Quad("floor", 12.0f, 12.0f);
     	quad.setLocalTranslation(0.0f, 0.0f, -3f);
-    	quad.setSolidColor(new float[] {0.5f,0.5f,0.5f,1.0f});
+    	quad.setSolidColor(new float[] {0.4f,0.4f,0.4f,1.0f});
     	room.attachChild(quad);
     	
     	box = new Box("GreenBox", 3.0f,3.0f,3.0f);
@@ -162,9 +165,23 @@ public class DemoGameThread extends Thread {
     	box.setLocalRotation(45, 0, 1, 0);
     	box.setSolidColor(GLColor.RED);
     	room.attachChild(box);
+    	
+    	TriMesh mesh = box.cloneMesh("ClonedMesh");
+    	mesh.getLocalTranslation()[2] += 1.5f;
+    	room.attachChild(mesh);
+    	
+    	box.setColors(new float[]{
+    			1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1, //front
+    			1,0,0,1, 1,0,0,1, 1,0,0,1, 1,0,0,1, //back
+    			0.5f,0.5f,0.5f,1.0f, 0.5f,0.5f,0.5f,1.0f, 0.5f,0.5f,0.5f,1.0f, 0.5f,0.5f,0.5f,1.0f, //right
+    			0.5f,0.5f,0.5f,1.0f, 0.5f,0.5f,0.5f,1.0f, 0.5f,0.5f,0.5f,1.0f, 0.5f,0.5f,0.5f,1.0f, //left
+    			0,0,1,1, 0,0,1,1, 0,0,1,1, 0,0,1,1, //top
+    			0,0,1,1, 0,0,1,1, 0,0,1,1, 0,0,1,1, //bottom
+    			
+    	});
 		
 		world.attachChild(room);
 		world.updateTransform();
-		world.updateBound();
+		world.updateWorldBound(false);
 	}
 }

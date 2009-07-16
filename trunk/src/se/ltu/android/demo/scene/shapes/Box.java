@@ -1,9 +1,7 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.scene.shapes;
 
-import se.ltu.android.demo.scene.IndexBuffer;
 import se.ltu.android.demo.scene.TriMesh;
-import se.ltu.android.demo.scene.VertexBuffer;
 
 /**
  * A box
@@ -13,34 +11,6 @@ import se.ltu.android.demo.scene.VertexBuffer;
  * @lastmodified $Date$
  */
 public class Box extends TriMesh {
-	
-	private static final int[] GEOMETRY_INDICES_DATA = {
-        2,  1,  0,  3,  2,  0, // back
-        6,  5,  4,  7,  6,  4, // right
-       10,  9,  8, 11, 10,  8, // front
-       14, 13, 12, 15, 14, 12, // left
-       18, 17, 16, 19, 18, 16, // top
-       22, 21, 20, 23, 22, 20  // bottom
-   };
-
-   private static final float[] GEOMETRY_NORMALS_DATA = {
-       0,  0, -1,  0,  0, -1,  0,  0, -1,  0,  0, -1, // back
-       1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0,  0, // right
-       0,  0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1, // front
-      -1,  0,  0, -1,  0,  0, -1,  0,  0, -1,  0,  0, // left
-       0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0, // top
-       0, -1,  0,  0, -1,  0,  0, -1,  0,  0, -1,  0  // bottom
-   };
-
-   private static final float[] GEOMETRY_TEXTURE_DATA = {
-       1, 0, 0, 0, 0, 1, 1, 1, // back
-       1, 0, 0, 0, 0, 1, 1, 1, // right
-       1, 0, 0, 0, 0, 1, 1, 1, // front
-       1, 0, 0, 0, 0, 1, 1, 1, // left
-       1, 0, 0, 0, 0, 1, 1, 1, // top
-       1, 0, 0, 0, 0, 1, 1, 1  // bottom
-   };
-
 	
 	private final static short[] INDICES = {
 			 0, 1, 2,	 2, 3, 0,	//front
@@ -164,11 +134,11 @@ public class Box extends TriMesh {
 			maxX,minY,maxZ,	minX,minY,maxZ,	//1,0 = bottom	20,21
 			minX,minY,minZ,	maxX,minY,minZ	//4,5			22,23
 		};
-
-		setIndexBuffer(new IndexBuffer(INDICES));
-		setVertexBuffer(new VertexBuffer(vertices));
-		vertexBuffer.setNormals(NORMALS);
-		vertexBuffer.setTexCoords(TEXCOORDS, 2);
+		
+		setVertices(vertices);
+		setIndices(INDICES);
+		setNormals(NORMALS);
+		setTexCoords(TEXCOORDS);
 	}
 	
 	
