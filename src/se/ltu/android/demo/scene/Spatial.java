@@ -19,7 +19,7 @@ public abstract class Spatial {
 	private final static String TAG = "Spatial";
 	protected Node parent;
 	protected String name = "unnamed node";
-	protected AABBox bound;
+	protected AABBox worldBound;
 	
 	/**
 	 * Transformation matrix
@@ -31,7 +31,7 @@ public abstract class Spatial {
 		
 	public Spatial(String name) {
 		this.name = name;
-		bound = new AABBox();
+		worldBound = new AABBox();
 		Matrix.setIdentityM(transM, 0);
 	}
 	
@@ -79,7 +79,14 @@ public abstract class Spatial {
 	}
 	
 	public void setLocalTranslation(float[] translation) {
-		locTranslation = translation; 
+		if(translation != null) {
+			if(locTranslation == null) {
+				locTranslation = new float[3];
+			}
+			locTranslation[0] = translation[0];
+			locTranslation[1] = translation[1];
+			locTranslation[2] = translation[2];
+		}
 	}
 	
 	public void setLocalRotation(float angle, float x, float y, float z) {
@@ -93,11 +100,25 @@ public abstract class Spatial {
 	}
 	
 	public void setLocalRotation(float[] rotation) {
-		locRotation = rotation;
+		if(rotation != null) {
+			if(locRotation == null) {
+				locRotation = new float[4];
+			}
+			locRotation[0] = rotation[0];
+			locRotation[1] = rotation[1];
+			locRotation[2] = rotation[2];
+		}
 	}
 	
 	public void setLocalScale(float[] scale) {
-		locScale = scale;
+		if(scale != null) {
+			if(locScale == null) {
+				locScale = new float[3];
+			}
+			locScale[0] = scale[0];
+			locScale[1] = scale[1];
+			locScale[2] = scale[2];
+		}
 	}
 	
 	public void setLocalScale(float x, float y, float z) {
@@ -110,7 +131,12 @@ public abstract class Spatial {
 	}
 	
 	public void setTransform(float[] transM) {
-		this.transM = transM;
+		if(transM.length != 16) {
+			return;
+		}
+		for(int i = 0; i < 16; i++) {
+			this.transM[i] = transM[i];
+		}
 	}
 
 	/* (non-Javadoc)
@@ -136,7 +162,15 @@ public abstract class Spatial {
 	/**
 	 * Updates the bounding volume for this spatial
 	 */
-	public abstract void updateBound();
+	public abstract void updateModelBound();
+	
+	/**
+	 * Updates the world bound for this spatial and
+	 * propagate the changes up to the root if wanted.
+	 * @param propagate set to true if we want to propagate the
+	 * changes up to the root 
+	 */
+	public abstract void updateWorldBound(boolean propagate);
 	
 	/**
 	 * Updates the world transformation matrix for this spatial
@@ -161,8 +195,8 @@ public abstract class Spatial {
 		}
 	}
 	
-	public AABBox getBound() {
-		return bound;
+	public AABBox getWorldBound() {
+		return worldBound;
 	}
 	
 	public void calculatePick(Ray ray, PickResult result) {
@@ -172,7 +206,7 @@ public abstract class Spatial {
 		}
 		
 		float distance = 0;
-		if(ray.intersects(bound, distance)) {
+		if(ray.intersects(worldBound, distance)) {
 			result.add(this, distance);
 		}
 	}

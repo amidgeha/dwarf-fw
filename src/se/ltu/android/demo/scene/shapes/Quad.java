@@ -1,9 +1,7 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.scene.shapes;
 
-import se.ltu.android.demo.scene.IndexBuffer;
 import se.ltu.android.demo.scene.TriMesh;
-import se.ltu.android.demo.scene.VertexBuffer;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -38,7 +36,7 @@ public class Quad extends TriMesh {
 	}
 
 	private void construct() {
-		draw_mode = TRIANGLE_FAN;
+		drawMode = MODE_TRIANGLE_FAN;
 		float minX = center[0] - extX;
 		float maxX = center[0] + extX;
 		float minY = center[1] - extY;
@@ -51,9 +49,9 @@ public class Quad extends TriMesh {
 				minX, maxY, 0
 		};
 		
-		setIndexBuffer(new IndexBuffer(INDICES));
-		setVertexBuffer(new VertexBuffer(vertices));
-		vertexBuffer.setNormals(NORMALS);
-		vertexBuffer.setTexCoords(TEXCOORDS, 2);
+		setVertices(vertices);
+		setIndices(INDICES);
+		setNormals(NORMALS);
+		setTexCoords(TEXCOORDS);
 	}
 }
