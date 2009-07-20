@@ -18,34 +18,41 @@ import se.ltu.android.demo.intersection.Ray;
  */
 public class Node extends Spatial {
 	private final static String TAG = "Node";
-	private ArrayList<Spatial> children;
+	protected ArrayList<Spatial> children = new ArrayList<Spatial>();
 	
 	public Node(String name) {
 		super(name);
-		children = new ArrayList<Spatial>();
 	}
 
 	@Override
 	public void draw(GL10 gl) {
-		int len = children.size();
-		Spatial child;
-		for (int i = 0; i < len; i++) {
-			child = children.get(i);
-			child.draw(gl);
+		synchronized(children) {
+			int len = children.size();
+			Spatial child;
+			for (int i = 0; i < len; i++) {
+				child = children.get(i);
+				child.draw(gl);
+			}
 		}
 	}
 
 	public void attachChild(Spatial child) {
-		children.add(child);
-		if(child.hasParent()) {
-			child.detachFromParent();
+		synchronized(children) {
+			synchronized(child) {
+				children.add(child);
+				if(child.hasParent()) {
+					child.detachFromParent();
+				}
+				child.parent = this;
+			}
 		}
-		child.parent = this;
 	}
 	
 	public void detachChild(Spatial child) {
-		children.remove(child);
-		child.parent = null;
+		synchronized(children) {
+			children.remove(child);
+			child.parent = null;
+		}
 	}
 	
 	public boolean hasChildren() {
@@ -162,6 +169,14 @@ public class Node extends Spatial {
 			for(int i = 0; i < len; i++) {
 				children.get(i).calculatePick(ray, result);
 			}
+		}
+	}
+	
+	public void update(long tpf) {
+		super.update(tpf);
+		int len = children.size();
+		for (int i = 0; i < len; i++) {
+			children.get(i).update(tpf);
 		}
 	}
 }

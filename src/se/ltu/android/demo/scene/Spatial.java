@@ -1,6 +1,8 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.scene;
 
+import java.util.ArrayList;
+
 import javax.microedition.khronos.opengles.GL10;
 
 import android.opengl.Matrix;
@@ -9,6 +11,7 @@ import android.util.Log;
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.intersection.PickResult;
 import se.ltu.android.demo.intersection.Ray;
+import se.ltu.android.demo.scene.animation.KeyFrameAnimation;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -20,6 +23,7 @@ public abstract class Spatial {
 	protected Node parent;
 	protected String name = "unnamed node";
 	protected AABBox worldBound;
+	protected ArrayList<KeyFrameAnimation> animations;
 	
 	/**
 	 * Transformation matrix
@@ -205,9 +209,38 @@ public abstract class Spatial {
 			return;
 		}
 		
-		float distance = 0;
+		float[] distance = new float[1];
 		if(ray.intersects(worldBound, distance)) {
-			result.add(this, distance);
+			result.add(this, distance[0]);
+		}
+	}
+	
+	public void addController(KeyFrameAnimation anim) {
+		if(animations == null) {
+			animations = new ArrayList<KeyFrameAnimation>();
+		}
+		anim.prepare(this);
+		animations.add(anim);
+	}
+	
+	public void clearControllers() {
+		animations.clear();
+	}
+	
+	public void removeController(KeyFrameAnimation anim) {
+		animations.remove(anim);
+	}
+	
+	public Node getParent() {
+		return parent;
+	}
+	
+	public void update(long tpf) {
+		if(animations != null) {
+			int len = animations.size();
+			for(int i = 0; i < len; i++) {
+				animations.get(i).update(tpf, this);
+			}
 		}
 	}
 }

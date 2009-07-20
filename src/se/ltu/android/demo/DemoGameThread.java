@@ -8,6 +8,8 @@ import se.ltu.android.demo.intersection.Ray;
 import se.ltu.android.demo.scene.Node;
 import se.ltu.android.demo.scene.Spatial;
 import se.ltu.android.demo.scene.TriMesh;
+import se.ltu.android.demo.scene.animation.KeyFrame;
+import se.ltu.android.demo.scene.animation.KeyFrameAnimation;
 import se.ltu.android.demo.scene.shapes.*;
 import se.ltu.android.demo.util.GLColor;
 
@@ -26,7 +28,7 @@ public class DemoGameThread extends Thread {
 	private DemoGLSurfaceView mGLView;
 	private boolean isRunning = true;
 	private boolean isPaused = false;
-	private TriMesh pickedMesh;
+	private Spatial pickedMesh;
 	private Box box;
 
 	public DemoGameThread(DemoGLSurfaceView glview) {
@@ -38,8 +40,7 @@ public class DemoGameThread extends Thread {
 		createWorld();
 		mGLView.getRenderer().setScene(world);
 		
-		long timeLast;
-		long timeNow;
+		long lastTime = System.currentTimeMillis();
 		long timeSleep;
 		while (isRunning) {
 	        while (isPaused && isRunning) {
@@ -51,11 +52,10 @@ public class DemoGameThread extends Thread {
 	        // this thread have control over the frame rate
 	        // especially timePerFrame will be useful in
 	        // animations
-	        timeLast = System.currentTimeMillis();
+	        timePerFrame = System.currentTimeMillis() - lastTime;
+	        lastTime = System.currentTimeMillis();
 	        update();
-	        timeNow = System.currentTimeMillis();
-	        timePerFrame = timeNow - timeLast;
-	        timeSleep = timeTarget - timePerFrame;
+	        timeSleep = timeTarget - timePerFrame + (lastTime - System.currentTimeMillis());
 	        if(timeSleep > 0) {
 	        	try {
 					sleep(timeSleep);
@@ -71,6 +71,7 @@ public class DemoGameThread extends Thread {
 	    //updateAI();
 	    //updatePhysics();
 	    //updateAnimations();
+	    world.update(timePerFrame);
 	    //updateSound();
 		mGLView.requestRender();
 	}
@@ -80,22 +81,39 @@ public class DemoGameThread extends Thread {
 		if(pickRay != null) {
 			PickResult result = new PickResult();
 			world.calculatePick(pickRay, result);
+			if(box != null) {
+				box.detachFromParent();
+			}
+			box = null;
 			if(result.size() > 0) {
 				Spatial spatial = result.getFirst();
-				Log.d(TAG, "Picked: "+spatial.getName());
-				if(box != null) {
-					box.detachFromParent();
-				}
-				box = null;
-				if(spatial instanceof TriMesh) {
-					pickedMesh = (TriMesh)spatial;
+				if(pickedMesh == null && spatial.getName().equals("piece")) {
+					
+					pickedMesh = spatial;
 					AABBox bound = pickedMesh.getWorldBound();
 					box = new Box("bounding", bound.minX, bound.minY, bound.minZ, bound.maxX, bound.maxY, bound.maxZ);
-					//box.setTransform(pickedBox.getTransform());
 					world.attachChild(box);
+				} else if(pickedMesh != null && spatial.hasParent()
+						&& spatial.getParent().getName().equals("Board")) {
+					
+					float[] from = pickedMesh.getLocalTranslation();
+					float[] to = spatial.getLocalTranslation();
+					KeyFrame frame = new KeyFrame(2000);
+					frame.setTranslation(to[0], to[1], from[2]);
+					KeyFrameAnimation anim = new KeyFrameAnimation();
+					anim.addFrame(frame);
+					pickedMesh.addController(anim);
+					pickedMesh = null;
+					
+				} else if(pickedMesh != null && spatial.getName().equals("piece")) {
+					
+					pickedMesh = null;
+					
 				}
+				//Log.d(TAG, "Picked: "+spatial.getName());
 			} else {
-				Log.d(TAG, "Picked none!");
+				pickedMesh = null;
+				//Log.d(TAG, "Picked none!");
 			}
 		}
 	}
@@ -111,6 +129,7 @@ public class DemoGameThread extends Thread {
 	private void createWorld() {
     	world = new Node("Root Node");
     	Node room = new Node("room");
+    	Node board;
     	Quad quad;
     	Box box;
     	   	  	
@@ -155,7 +174,13 @@ public class DemoGameThread extends Thread {
     	quad.setSolidColor(new float[] {0.4f,0.4f,0.4f,1.0f});
     	room.attachChild(quad);
     	
-    	room.attachChild(createBoard());
+    	board = createBoard();
+    	
+    	box = new Box("piece", 0.60f, 0.60f, 0.80f);
+    	box.setLocalTranslation(-2.5f, -2.5f, 0.5f);
+    	box.setSolidColor(GLColor.BLACK);
+    	room.attachChild(box);
+    	
     	
     	/*
     	box = new Box("GreenBox", 3.0f,3.0f,3.0f);
@@ -184,6 +209,7 @@ public class DemoGameThread extends Thread {
     	});
     	*/
 		
+    	room.attachChild(board);
 		world.attachChild(room);
 		world.updateTransform();
 		world.updateWorldBound(false);
@@ -192,7 +218,7 @@ public class DemoGameThread extends Thread {
 	/**
 	 * @return
 	 */
-	private Spatial createBoard() {
+	private Node createBoard() {
 		Node board = new Node("Board");
 		Box darkSquare = new Box("darkSquare", 1.0f, 1.0f, 0.2f);
 		Box lightSquare = new Box("lightSquare", 1.0f, 1.0f, 0.2f);
