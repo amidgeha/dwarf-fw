@@ -9,7 +9,7 @@ import se.ltu.android.demo.scene.TriMesh;
  * @lastmodified $Date$
  */
 public class Quad extends TriMesh {
-	private final static short[] INDICES = {
+	private final static char[] INDICES = {
 		0,1,2,3
 	};
 	private final static float[] NORMALS = {
