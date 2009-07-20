@@ -12,7 +12,7 @@ import se.ltu.android.demo.scene.TriMesh;
  */
 public class Box extends TriMesh {
 	
-	private final static short[] INDICES = {
+	private final static char[] INDICES = {
 			 0, 1, 2,	 2, 3, 0,	//front
 			 5, 4, 7,	 7, 6, 5,	//back
 			 8, 9,10,	10,11, 8,	//right

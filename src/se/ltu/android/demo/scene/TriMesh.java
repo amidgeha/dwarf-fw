@@ -3,6 +3,7 @@ package se.ltu.android.demo.scene;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
@@ -30,11 +31,12 @@ public class TriMesh extends Spatial {
 	 * Local center point of this geometry in x,y,z.
 	 */
 	protected float[] center = {0.0f, 0.0f, 0.0f};
-	protected ShortBuffer indices;
+	//use char instead of short since char is unsigned (both 2-bytes long) 
+	protected CharBuffer indices;
 	//private, so no one can circumvent the hasDirtyModelBound check
 	private FloatBuffer vertices;
 	protected FloatBuffer normals;
-	protected FloatBuffer colors;
+	protected ByteBuffer colors;
 	protected FloatBuffer texcoords;
 	protected boolean hasDirtyModelBound = true;
 	protected TriMesh cloneTarget = null;
@@ -66,6 +68,11 @@ public class TriMesh extends Spatial {
 	 * @return the cloned TriMesh
 	 */
 	public TriMesh cloneMesh(String name) {
+		if(vertices == null || indices == null) {
+			Log.e(TAG, "Can not clone a TriMesh with no vertices or indices");
+			return null;
+		}
+		
 		TriMesh clone = new TriMesh(name);
 		clone.cloneTarget = this;
 		clone.modelBound = modelBound;
@@ -84,7 +91,7 @@ public class TriMesh extends Spatial {
 	}
 	
 	@Override
-	public void draw(GL10 gl) {	
+	public void draw(GL10 gl) {
 		// test for null first so we can return without manipulating the stack
 		if(vertices == null) {
 			Log.e(TAG, "Vertices are null in: "+name);
@@ -104,7 +111,7 @@ public class TriMesh extends Spatial {
 		if(colors != null) {
 			colors.rewind();
 			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-			gl.glColorPointer(4, GL10.GL_FLOAT, 0, colors);
+			gl.glColorPointer(4, GL10.GL_UNSIGNED_BYTE, 0, colors);
 		}
 		if(normals != null) {
 			normals.rewind();
@@ -132,7 +139,7 @@ public class TriMesh extends Spatial {
 	 * @param colorArray
 	 * @return
 	 */
-	public void setColors(float[] colorArray) {
+	public void setColors(byte[] colorArray) {
 		int size = colorArray.length;
 		if(size != vertexCount * 4) {
 			Log.e(TAG, "Invalid array length (Expected: "
@@ -140,17 +147,17 @@ public class TriMesh extends Spatial {
 			return;
 		}
 		if(colors == null || colors.capacity() != size) {
-			colors = allocateFloatBuffer(size);
+			colors = allocateByteBuffer(size);
 		}
 		colors.clear();
 		colors.put(colorArray);
 		return;
 	}
 	
-	public void setIndices(short[] indexArray) {
+	public void setIndices(char[] indexArray) {
 		int size = indexArray.length;
 		if(indices == null || indices.capacity() != size) {
-			indices = allocateShortBuffer(size);
+			indices = allocateCharBuffer(size);
 		}
 		indices.clear();
 		indices.put(indexArray);
@@ -189,16 +196,36 @@ public class TriMesh extends Spatial {
 					+4+", Found: "+size+") in "+name);
 			return;
 		}
-		if(colors == null || colors.capacity() != vertexCount*4) {
-			colors = allocateFloatBuffer(4*vertexCount);
-		}
-		colors.clear();
-		for(int i = 0; i < vertexCount; i++) {
-			colors.put(color4f);
-		}
+		byte[] color4b = new byte[4];
+		color4b[0] = (byte) ((int)((color4f[0] * 255)) & 0xff);
+		color4b[1] = (byte) ((int)((color4f[1] * 255)) & 0xff);
+		color4b[2] = (byte) ((int)((color4f[2] * 255)) & 0xff);
+		color4b[3] = (byte) ((int)((color4f[3] * 255)) & 0xff);
+		setSolidColor(color4b);
 		return;
 	}
 	
+	/**
+	 * 
+	 * @param color4b array with RGBA components as unsigned bytes 
+	 */
+	public void setSolidColor(byte[] color4b) {
+		int size = color4b.length;
+		if(size != 4) {
+			Log.e(TAG, "Invalid array length (Expected: "
+					+4+", Found: "+size+") in "+name);
+			return;
+		}
+		if(colors == null || colors.capacity() != vertexCount*4) {
+			colors = allocateByteBuffer(4*vertexCount);
+		}
+		colors.clear();
+		for(int i = 0; i < vertexCount; i++) {
+			colors.put(color4b);
+		}
+		return;
+	}
+
 	/**
 	 * 
 	 * @param texcoords
@@ -309,9 +336,15 @@ public class TriMesh extends Spatial {
 		return bb.asFloatBuffer();
 	}
 	
-	private ShortBuffer allocateShortBuffer(int size) {
+	private CharBuffer allocateCharBuffer(int size) {
 		ByteBuffer bb = ByteBuffer.allocateDirect(2*size);
 		bb.order(ByteOrder.nativeOrder());
-		return bb.asShortBuffer();
+		return bb.asCharBuffer();
+	}
+	
+	private ByteBuffer allocateByteBuffer(int size) {
+		ByteBuffer bb = ByteBuffer.allocateDirect(size);
+		bb.order(ByteOrder.nativeOrder());
+		return bb;
 	}
 }

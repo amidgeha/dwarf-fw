@@ -155,6 +155,9 @@ public class DemoGameThread extends Thread {
     	quad.setSolidColor(new float[] {0.4f,0.4f,0.4f,1.0f});
     	room.attachChild(quad);
     	
+    	room.attachChild(createBoard());
+    	
+    	/*
     	box = new Box("GreenBox", 3.0f,3.0f,3.0f);
     	box.setLocalTranslation(-3f, -3f, 0f);
     	box.setSolidColor(GLColor.GREEN);
@@ -179,9 +182,41 @@ public class DemoGameThread extends Thread {
     			0,0,1,1, 0,0,1,1, 0,0,1,1, 0,0,1,1, //bottom
     			
     	});
+    	*/
 		
 		world.attachChild(room);
 		world.updateTransform();
 		world.updateWorldBound(false);
+	}
+
+	/**
+	 * @return
+	 */
+	private Spatial createBoard() {
+		Node board = new Node("Board");
+		Box darkSquare = new Box("darkSquare", 1.0f, 1.0f, 0.2f);
+		Box lightSquare = new Box("lightSquare", 1.0f, 1.0f, 0.2f);
+		darkSquare.setSolidColor(new float[]{0.4f,0.2f,0.08f,1.0f});
+		lightSquare.setSolidColor(new float[]{0.87f,0.62f,0.45f,1.0f});
+		
+		TriMesh curSquare = null;
+		short oddeven = 1; // 1a (a dark square) starts as odd
+		String name;
+		// create chess board from 1a to 8h
+		for(short row = 1; row < 9; row++) {
+			for(short col = 0; col < 8; col++) {
+				name = String.valueOf((char)('a'+col)) + row;
+				if((oddeven & 1) == 0) {
+					curSquare = lightSquare.cloneMesh(name);
+				} else {
+					curSquare = darkSquare.cloneMesh(name);
+				}
+				curSquare.setLocalTranslation(col-3.5f, row-4.5f, 0.0f);
+				board.attachChild(curSquare);
+				oddeven++;
+			}
+			oddeven++;
+		}
+		return board;
 	}
 }

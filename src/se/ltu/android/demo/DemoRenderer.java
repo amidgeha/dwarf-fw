@@ -3,6 +3,7 @@ package se.ltu.android.demo;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.opengles.GL11;
 
 import se.ltu.android.demo.intersection.Ray;
 import se.ltu.android.demo.scene.Node;
@@ -13,6 +14,7 @@ import se.ltu.android.demo.util.GLExtras;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.Matrix;
+import android.os.Debug;
 import android.util.FloatMath;
 import android.util.Log;
 
@@ -41,8 +43,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	private int height;
 	private float aspect;
 
-	private float pickX;
-	private float pickY;
+	private float pickX = -1;
+	private float pickY = -1;
 	private Ray pickRay;
 	
 	public DemoRenderer(SensorHandler handler) {
@@ -73,6 +75,12 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     	
     	gl.glViewport(0, 0, width, height);
         gl.glMatrixMode(GL10.GL_PROJECTION);
+        Log.d(TAG, gl.glGetString(GL10.GL_EXTENSIONS));
+        if(gl instanceof GL11) {
+        	GL11 gl11 = (GL11)gl;
+        	Log.d(TAG, "----");
+        	Log.d(TAG, gl11.glGetString(GL11.GL_EXTENSIONS));
+        }
         
         gl.glLoadIdentity();
         GLU.gluPerspective(gl, FOVY, aspect, ZNEAR, ZFAR);
@@ -85,17 +93,20 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         
         // setup camera
         gl.glMatrixMode(GL10.GL_MODELVIEW);
-        mSensorHandler.getRotM4(modelM);
-        Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2]);
+        //mSensorHandler.getRotM4(modelM);
+        //Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2]);
+        Matrix.setIdentityM(modelM, 0);
+        Matrix.translateM(modelM, 0, 0, 0, -12);
     	gl.glLoadMatrixf(modelM, 0);
              
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         
         // draw the world
         if(scene != null) {
+        	//Debug.startMethodTracing("Draw scene");
         	scene.draw(gl);
+        	//Debug.stopMethodTracing();
         }
-        /*
         long now = System.currentTimeMillis();
         if(now - lastFrame >= 1000l) {
             Log.d(TAG, tmp=fps + " fps");
@@ -104,7 +115,6 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         } else {
         	fps++;
         }
-        */
         
         calcTouchRay(gl);
     }
