@@ -172,495 +172,22 @@ public class Ray {
 	
 	/**
 	 * Calculates whether or not the ray intersects an axis-aligned bounding box.
+	 * Same as calling <code>intersects(box, null)</code>
 	 * @param box an axis-aligned bounding box
-	 * @param distance the resulting distance from the origin of this ray to the 
-	 * intersection point of the box, only valid if this method returns true.
 	 * @return true if this ray intersects the box
 	 */
-	public boolean intersects(AABBox box, float distance){
-
-		switch (classification)
-		{
-		case CLASSIFICATION_MMM:
-			{
-			if ((x < box.minX) || (y < box.minY) || (z < box.minZ)
-				|| (jbyi * box.minX - box.maxY + c_xy > 0)
-				|| (ibyj * box.minY - box.maxX + c_yx > 0)
-				|| (jbyk * box.minZ - box.maxY + c_zy > 0)
-				|| (kbyj * box.minY - box.maxZ + c_yz > 0)
-				|| (kbyi * box.minX - box.maxZ + c_xz > 0)
-				|| (ibyk * box.minZ - box.maxX + c_zx > 0)
-				)
-				return false;
-			
-				// compute the intersection distance
-			
-				distance = (box.maxX - x) * ii;
-				float dist1 = (box.maxY - y) * ij;
-				if(dist1 > distance)
-					distance = dist1;
-				float dist2 = (box.maxZ - z) * ik;
-				if(dist2 > distance)
-					distance = dist2;
-
-				return true;
-			}
-
-
-		case CLASSIFICATION_MMP:
-			{		
-			if ((x < box.minX) || (y < box.minY) || (z > box.maxZ)
-				|| (jbyi * box.minX - box.maxY + c_xy > 0)
-				|| (ibyj * box.minY - box.maxX + c_yx > 0)
-				|| (jbyk * box.maxZ - box.maxY + c_zy > 0)
-				|| (kbyj * box.minY - box.minZ + c_yz < 0)
-				|| (kbyi * box.minX - box.minZ + c_xz < 0)
-				|| (ibyk * box.maxZ - box.maxX + c_zx > 0)
-				)
-				return false;
-			
-				distance = (box.maxX - x) * ii;
-				float t1 = (box.maxY - y) * ij;
-				if(t1 > distance)
-					distance = t1;
-				float t2 = (box.minZ - z) * ik;
-				if(t2 > distance)
-					distance = t2;
-			
-				return true;
-			}
-
-		case CLASSIFICATION_MPM:
-			{		
-			if ((x < box.minX) || (y > box.maxY) || (z < box.minZ)
-				|| (jbyi * box.minX - box.minY + c_xy < 0) 
-				|| (ibyj * box.maxY - box.maxX + c_yx > 0)
-				|| (jbyk * box.minZ - box.minY + c_zy < 0) 
-				|| (kbyj * box.maxY - box.maxZ + c_yz > 0)
-				|| (kbyi * box.minX - box.maxZ + c_xz > 0)
-				|| (ibyk * box.minZ - box.maxX + c_zx > 0)
-				)
-				return false;
-			
-			distance = (box.maxX - x) * ii;
-			float t1 = (box.minY - y) * ij;
-			if(t1 > distance)
-				distance = t1;
-			float t2 = (box.maxZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}
-
-		case CLASSIFICATION_MPP:
-			{
-			if ((x < box.minX) || (y > box.maxY) || (z > box.maxZ)
-				|| (jbyi * box.minX - box.minY + c_xy < 0) 
-				|| (ibyj * box.maxY - box.maxX + c_yx > 0)
-				|| (jbyk * box.maxZ - box.minY + c_zy < 0)
-				|| (kbyj * box.maxY - box.minZ + c_yz < 0) 
-				|| (kbyi * box.minX - box.minZ + c_xz < 0)
-				|| (ibyk * box.maxZ - box.maxX + c_zx > 0)
-				)
-				return false;
-			
-			distance = (box.maxX - x) * ii;
-				float t1 = (box.minY - y) * ij;
-				if(t1 > distance)
-					distance = t1;
-				float t2 = (box.minZ - z) * ik;
-				if(t2 > distance)
-					distance = t2;
-
-				return true;
-			}
-
-		case CLASSIFICATION_PMM:
-			{
-			if ((x > box.maxX) || (y < box.minY) || (z < box.minZ)
-				|| (jbyi * box.maxX - box.maxY + c_xy > 0)
-				|| (ibyj * box.minY - box.minX + c_yx < 0)
-				|| (jbyk * box.minZ - box.maxY + c_zy > 0)
-				|| (kbyj * box.minY - box.maxZ + c_yz > 0)
-				|| (kbyi * box.maxX - box.maxZ + c_xz > 0)
-				|| (ibyk * box.minZ - box.minX + c_zx < 0)
-				)
-				return false;
-			
-			distance = (box.minX - x) * ii;
-				float t1 = (box.maxY - y) * ij;
-				if(t1 > distance)
-					distance = t1;
-				float t2 = (box.maxZ - z) * ik;
-				if(t2 > distance)
-					distance = t2;
-
-				return true;
-			}
-			
-
-		case CLASSIFICATION_PMP:
-			{
-			if ((x > box.maxX) || (y < box.minY) || (z > box.maxZ)
-				|| (jbyi * box.maxX - box.maxY + c_xy > 0)
-				|| (ibyj * box.minY - box.minX + c_yx < 0)
-				|| (jbyk * box.maxZ - box.maxY + c_zy > 0)
-				|| (kbyj * box.minY - box.minZ + c_yz < 0)
-				|| (kbyi * box.maxX - box.minZ + c_xz < 0)
-				|| (ibyk * box.maxZ - box.minX + c_zx < 0)
-				)
-				return false;
-
-			distance = (box.minX - x) * ii;
-				float t1 = (box.maxY - y) * ij;
-				if(t1 > distance)
-					distance = t1;
-				float t2 = (box.minZ - z) * ik;
-				if(t2 > distance)
-					distance = t2;
-
-				return true;
-			}
-
-		case CLASSIFICATION_PPM:
-			{
-			if ((x > box.maxX) || (y > box.maxY) || (z < box.minZ)
-				|| (jbyi * box.maxX - box.minY + c_xy < 0)
-				|| (ibyj * box.maxY - box.minX + c_yx < 0)
-				|| (jbyk * box.minZ - box.minY + c_zy < 0) 
-				|| (kbyj * box.maxY - box.maxZ + c_yz > 0)
-				|| (kbyi * box.maxX - box.maxZ + c_xz > 0)
-				|| (ibyk * box.minZ - box.minX + c_zx < 0)
-				)
-				return false;
-			
-			distance = (box.minX - x) * ii;
-				float t1 = (box.minY - y) * ij;
-				if(t1 > distance)
-					distance = t1;
-				float t2 = (box.maxZ - z) * ik;
-				if(t2 > distance)
-					distance = t2;
-
-				return true;
-			}
-
-		case CLASSIFICATION_PPP:
-			{
-			if ((x > box.maxX) || (y > box.maxY) || (z > box.maxZ)
-				|| (jbyi * box.maxX - box.minY + c_xy < 0)
-				|| (ibyj * box.maxY - box.minX + c_yx < 0)
-				|| (jbyk * box.maxZ - box.minY + c_zy < 0)
-				|| (kbyj * box.maxY - box.minZ + c_yz < 0)
-				|| (kbyi * box.maxX - box.minZ + c_xz < 0)
-				|| (ibyk * box.maxZ - box.minX + c_zx < 0)
-				)
-				return false;
-			
-			distance = (box.minX - x) * ii;
-				float t1 = (box.minY - y) * ij;
-				if(t1 > distance)
-					distance = t1;
-				float t2 = (box.minZ - z) * ik;
-				if(t2 > distance)
-					distance = t2;
-
-				return true;
-			}
-
-		case CLASSIFICATION_OMM:
-			{
-			if((x < box.minX) || (x > box.maxX)
-				|| (y < box.minY) || (z < box.minZ)
-				|| (jbyk * box.minZ - box.maxY + c_zy > 0)
-				|| (kbyj * box.minY - box.maxZ + c_yz > 0)
-				)
-				return false;
-
-			distance = (box.maxY - y) * ij;
-			float t2 = (box.maxZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}
-
-		case CLASSIFICATION_OMP:
-			{
-			if((x < box.minX) || (x > box.maxX)
-				|| (y < box.minY) || (z > box.maxZ)
-				|| (jbyk * box.maxZ - box.maxY + c_zy > 0)
-				|| (kbyj * box.minY - box.minZ + c_yz < 0)
-				)
-				return false;
-
-			distance = (box.maxY - y) * ij;
-			float t2 = (box.minZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}
-
-		case CLASSIFICATION_OPM:
-			{
-			if((x < box.minX) || (x > box.maxX)
-				|| (y > box.maxY) || (z < box.minZ)
-				|| (jbyk * box.minZ - box.minY + c_zy < 0) 
-				|| (kbyj * box.maxY - box.maxZ + c_yz > 0)
-				)
-				return false;
-
-			distance = (box.minY - y) * ij;		
-			float t2 = (box.maxZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}
-
-		case CLASSIFICATION_OPP:
-			{
-			if((x < box.minX) || (x > box.maxX)
-				|| (y > box.maxY) || (z > box.maxZ)
-				|| (jbyk * box.maxZ - box.minY + c_zy < 0)
-				|| (kbyj * box.maxY - box.minZ + c_yz < 0)
-				)
-				return false;
-			
-			distance = (box.minY - y) * ij;		
-			float t2 = (box.minZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}
-			
-
-		case CLASSIFICATION_MOM:
-			{
-			if((y < box.minY) || (y > box.maxY)
-				|| (x < box.minX) || (z < box.minZ) 
-				|| (kbyi * box.minX - box.maxZ + c_xz > 0)
-				|| (ibyk * box.minZ - box.maxX + c_zx > 0)
-				)
-				return false;
-			
-			distance = (box.maxX - x) * ii;
-			float t2 = (box.maxZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}
-			
-
-		case CLASSIFICATION_MOP:
-			{
-			if((y < box.minY) || (y > box.maxY)
-				|| (x < box.minX) || (z > box.maxZ) 
-				|| (kbyi * box.minX - box.minZ + c_xz < 0)
-				|| (ibyk * box.maxZ - box.maxX + c_zx > 0)
-				)
-				return false;
-
-			distance = (box.maxX - x) * ii;
-			float t2 = (box.minZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}
-
-		case CLASSIFICATION_POM:
-			{
-			if((y < box.minY) || (y > box.maxY)
-				|| (x > box.maxX) || (z < box.minZ)
-				|| (kbyi * box.maxX - box.maxZ + c_xz > 0)
-				|| (ibyk * box.minZ - box.minX + c_zx < 0)
-				)
-				return false;
-			
-			distance = (box.minX - x) * ii;
-			float t2 = (box.maxZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}
-				
-
-		case CLASSIFICATION_POP:
-			{
-			if((y < box.minY) || (y > box.maxY)
-				|| (x > box.maxX) || (z > box.maxZ)
-				|| (kbyi * box.maxX - box.minZ + c_xz < 0)
-				|| (ibyk * box.maxZ - box.minX + c_zx < 0)
-				)
-				return false;
-
-			distance = (box.minX - x) * ii;
-			float t2 = (box.minZ - z) * ik;
-			if(t2 > distance)
-				distance = t2;
-
-			return true;
-			}	
-
-		case CLASSIFICATION_MMO:
-			{
-			if((z < box.minZ) || (z > box.maxZ)
-				|| (x < box.minX) || (y < box.minY)  
-				|| (jbyi * box.minX - box.maxY + c_xy > 0)
-				|| (ibyj * box.minY - box.maxX + c_yx > 0)
-				)
-				return false;
-
-			distance = (box.maxX - x) * ii;
-			float t1 = (box.maxY - y) * ij;
-			if(t1 > distance)
-				distance = t1;
-
-			return true;
-			}	
-
-		case CLASSIFICATION_MPO:
-			{
-			if((z < box.minZ) || (z > box.maxZ)
-				|| (x < box.minX) || (y > box.maxY) 
-				|| (jbyi * box.minX - box.minY + c_xy < 0) 
-				|| (ibyj * box.maxY - box.maxX + c_yx > 0)
-				)
-				return false;
-			
-			distance = (box.maxX - x) * ii;
-			float t1 = (box.minY - y) * ij;
-			if(t1 > distance)
-				distance = t1;
-			
-			return true;
-			}
-			
-
-		case CLASSIFICATION_PMO:
-			{
-			if((z < box.minZ) || (z > box.maxZ)
-				|| (x > box.maxX) || (y < box.minY) 
-				|| (jbyi * box.maxX - box.maxY + c_xy > 0)
-				|| (ibyj * box.minY - box.minX + c_yx < 0) 
-				)
-				return false;
-
-			distance = (box.minX - x) * ii;
-			float t1 = (box.maxY - y) * ij;
-			if(t1 > distance)
-				distance = t1;
-			
-			return true;
-			}
-
-		case CLASSIFICATION_PPO:
-			{
-			if((z < box.minZ) || (z > box.maxZ)
-				|| (x > box.maxX) || (y > box.maxY) 
-				|| (jbyi * box.maxX - box.minY + c_xy < 0)
-				|| (ibyj * box.maxY - box.minX + c_yx < 0)
-				)
-				return false;
-		
-			distance = (box.minX - x) * ii;
-			float t1 = (box.minY - y) * ij;
-			if(t1 > distance)
-				distance = t1;
-
-			return true;
-			}
-			
-
-		case CLASSIFICATION_MOO:
-			{
-			if((x < box.minX)
-				|| (y < box.minY) || (y > box.maxY)
-				|| (z < box.minZ) || (z > box.maxZ)
-				)
-				return false;
-
-			distance = (box.maxX - x) * ii;
-			return true;
-			}
-
-		case CLASSIFICATION_POO:
-			{
-			if((x > box.maxX)
-				|| (y < box.minY) || (y > box.maxY)
-				|| (z < box.minZ) || (z > box.maxZ)
-				)
-				return false;
-
-			distance = (box.minX - x) * ii;
-			return true;
-			}
-
-		case CLASSIFICATION_OMO:
-			{
-			if((y < box.minY)
-				|| (x < box.minX) || (x > box.maxX)
-				|| (z < box.minZ) || (z > box.maxZ)
-				)
-				return false;
-			
-			distance = (box.maxY - y) * ij;
-			return true;
-			}
-
-		case CLASSIFICATION_OPO:
-			{
-			if((y > box.maxY)
-				|| (x < box.minX) || (x > box.maxX)
-				|| (z < box.minZ) || (z > box.maxZ)
-				)
-				return false;
-
-			distance = (box.minY - y) * ij;
-			return true;
-			}
-
-
-		case CLASSIFICATION_OOM:
-			{
-			if((z < box.minZ)
-				|| (x < box.minX) || (x > box.maxX)
-				|| (y < box.minY) || (y > box.maxY)
-				)
-				return false;
-
-			distance = (box.maxZ - z) * ik;
-			return true;
-			}
-
-		case CLASSIFICATION_OOP:
-			{
-			if((z > box.maxZ)
-				|| (x < box.minX) || (x > box.maxX)
-				|| (y < box.minY) || (y > box.maxY)
-				)
-				return false;
-
-			distance = (box.minZ - z) * ik;
-			return true;
-			}	
-		}
-
-		return false;
+	public boolean intersects(AABBox box){
+		return intersects(box, null);
 	}
 	
 	/**
 	 * Calculates whether or not the ray intersects an axis-aligned bounding box.
 	 * @param box an axis-aligned bounding box
+	 * @param distance the resulting distance from the origin of this ray to the 
+	 * intersection point of the box, only valid if this method returns true.
 	 * @return true if this ray intersects the box
 	 */
-	public boolean intersects(AABBox box){
+	public boolean intersects(AABBox box, float[] distance){
 
 		switch (classification)
 		{
@@ -675,9 +202,20 @@ public class Ray {
 				|| (ibyk * box.minZ - box.maxX + c_zx > 0)
 				)
 				return false;
-
-				return true;
+			
+				// compute the intersection distance[0]
+			if(distance != null) {
+				distance[0] = (box.maxX - x) * ii;
+				float dist1 = (box.maxY - y) * ij;
+				if(dist1 > distance[0])
+					distance[0] = dist1;
+				float dist2 = (box.maxZ - z) * ik;
+				if(dist2 > distance[0])
+					distance[0] = dist2;
 			}
+
+			return true;
+		}
 
 
 		case CLASSIFICATION_MMP:
@@ -691,6 +229,16 @@ public class Ray {
 				|| (ibyk * box.maxZ - box.maxX + c_zx > 0)
 				)
 				return false;
+			
+			if(distance != null) {
+				distance[0] = (box.maxX - x) * ii;
+				float t1 = (box.maxY - y) * ij;
+				if(t1 > distance[0])
+					distance[0] = t1;
+				float t2 = (box.minZ - z) * ik;
+				if(t2 > distance[0])
+					distance[0] = t2;
+			}
 			
 				return true;
 			}
@@ -706,6 +254,16 @@ public class Ray {
 				|| (ibyk * box.minZ - box.maxX + c_zx > 0)
 				)
 				return false;
+			
+			if(distance != null) {
+			distance[0] = (box.maxX - x) * ii;
+			float t1 = (box.minY - y) * ij;
+			if(t1 > distance[0])
+				distance[0] = t1;
+			float t2 = (box.maxZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
 
 			return true;
 			}
@@ -722,6 +280,16 @@ public class Ray {
 				)
 				return false;
 			
+			if(distance != null) {
+			distance[0] = (box.maxX - x) * ii;
+				float t1 = (box.minY - y) * ij;
+				if(t1 > distance[0])
+					distance[0] = t1;
+				float t2 = (box.minZ - z) * ik;
+				if(t2 > distance[0])
+					distance[0] = t2;
+			}
+
 				return true;
 			}
 
@@ -737,6 +305,16 @@ public class Ray {
 				)
 				return false;
 			
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+				float t1 = (box.maxY - y) * ij;
+				if(t1 > distance[0])
+					distance[0] = t1;
+				float t2 = (box.maxZ - z) * ik;
+				if(t2 > distance[0])
+					distance[0] = t2;
+			}
+
 				return true;
 			}
 			
@@ -753,6 +331,16 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+				float t1 = (box.maxY - y) * ij;
+				if(t1 > distance[0])
+					distance[0] = t1;
+				float t2 = (box.minZ - z) * ik;
+				if(t2 > distance[0])
+					distance[0] = t2;
+			}
+
 				return true;
 			}
 
@@ -768,6 +356,16 @@ public class Ray {
 				)
 				return false;
 			
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+				float t1 = (box.minY - y) * ij;
+				if(t1 > distance[0])
+					distance[0] = t1;
+				float t2 = (box.maxZ - z) * ik;
+				if(t2 > distance[0])
+					distance[0] = t2;
+			}
+
 				return true;
 			}
 
@@ -783,6 +381,16 @@ public class Ray {
 				)
 				return false;
 			
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+				float t1 = (box.minY - y) * ij;
+				if(t1 > distance[0])
+					distance[0] = t1;
+				float t2 = (box.minZ - z) * ik;
+				if(t2 > distance[0])
+					distance[0] = t2;
+			}
+
 				return true;
 			}
 
@@ -794,6 +402,13 @@ public class Ray {
 				|| (kbyj * box.minY - box.maxZ + c_yz > 0)
 				)
 				return false;
+
+			if(distance != null) {
+			distance[0] = (box.maxY - y) * ij;
+			float t2 = (box.maxZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
 
 			return true;
 			}
@@ -807,6 +422,13 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.maxY - y) * ij;
+			float t2 = (box.minZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
+
 			return true;
 			}
 
@@ -818,6 +440,13 @@ public class Ray {
 				|| (kbyj * box.maxY - box.maxZ + c_yz > 0)
 				)
 				return false;
+
+			if(distance != null) {
+			distance[0] = (box.minY - y) * ij;		
+			float t2 = (box.maxZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
 
 			return true;
 			}
@@ -831,6 +460,13 @@ public class Ray {
 				)
 				return false;
 			
+			if(distance != null) {
+			distance[0] = (box.minY - y) * ij;		
+			float t2 = (box.minZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
+
 			return true;
 			}
 			
@@ -844,6 +480,13 @@ public class Ray {
 				)
 				return false;
 			
+			if(distance != null) {
+			distance[0] = (box.maxX - x) * ii;
+			float t2 = (box.maxZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
+
 			return true;
 			}
 			
@@ -857,6 +500,13 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.maxX - x) * ii;
+			float t2 = (box.minZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
+
 			return true;
 			}
 
@@ -869,6 +519,13 @@ public class Ray {
 				)
 				return false;
 			
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+			float t2 = (box.maxZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
+
 			return true;
 			}
 				
@@ -882,6 +539,13 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+			float t2 = (box.minZ - z) * ik;
+			if(t2 > distance[0])
+				distance[0] = t2;
+			}
+
 			return true;
 			}	
 
@@ -894,6 +558,13 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.maxX - x) * ii;
+			float t1 = (box.maxY - y) * ij;
+			if(t1 > distance[0])
+				distance[0] = t1;
+			}
+
 			return true;
 			}	
 
@@ -905,6 +576,13 @@ public class Ray {
 				|| (ibyj * box.maxY - box.maxX + c_yx > 0)
 				)
 				return false;
+			
+			if(distance != null) {
+			distance[0] = (box.maxX - x) * ii;
+			float t1 = (box.minY - y) * ij;
+			if(t1 > distance[0])
+				distance[0] = t1;
+			}
 			
 			return true;
 			}
@@ -919,6 +597,13 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+			float t1 = (box.maxY - y) * ij;
+			if(t1 > distance[0])
+				distance[0] = t1;
+			}
+			
 			return true;
 			}
 
@@ -931,6 +616,13 @@ public class Ray {
 				)
 				return false;
 		
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+			float t1 = (box.minY - y) * ij;
+			if(t1 > distance[0])
+				distance[0] = t1;
+			}
+
 			return true;
 			}
 			
@@ -943,6 +635,9 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.maxX - x) * ii;
+			}
 			return true;
 			}
 
@@ -954,6 +649,9 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.minX - x) * ii;
+			}
 			return true;
 			}
 
@@ -965,6 +663,9 @@ public class Ray {
 				)
 				return false;
 			
+			if(distance != null) {
+			distance[0] = (box.maxY - y) * ij;
+			}
 			return true;
 			}
 
@@ -976,6 +677,9 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.minY - y) * ij;
+			}
 			return true;
 			}
 
@@ -988,6 +692,9 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.maxZ - z) * ik;
+			}
 			return true;
 			}
 
@@ -999,6 +706,9 @@ public class Ray {
 				)
 				return false;
 
+			if(distance != null) {
+			distance[0] = (box.minZ - z) * ik;
+			}
 			return true;
 			}	
 		}

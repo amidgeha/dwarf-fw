@@ -29,4 +29,8 @@ public class PickResult {
 	public int size() {
 		return map.size();
 	}
+	
+	public String toString() {
+		return map.toString();
+	}
 }

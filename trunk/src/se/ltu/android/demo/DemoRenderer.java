@@ -74,14 +74,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     	aspect = (float) w / h;
     	
     	gl.glViewport(0, 0, width, height);
-        gl.glMatrixMode(GL10.GL_PROJECTION);
-        Log.d(TAG, gl.glGetString(GL10.GL_EXTENSIONS));
-        if(gl instanceof GL11) {
-        	GL11 gl11 = (GL11)gl;
-        	Log.d(TAG, "----");
-        	Log.d(TAG, gl11.glGetString(GL11.GL_EXTENSIONS));
-        }
-        
+        gl.glMatrixMode(GL10.GL_PROJECTION);     
         gl.glLoadIdentity();
         GLU.gluPerspective(gl, FOVY, aspect, ZNEAR, ZFAR);
         //GLExtras.gluPerspective(FOVY, aspect, ZNEAR, ZFAR, projM);
