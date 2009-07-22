@@ -10,6 +10,7 @@ import java.nio.ShortBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 import se.ltu.android.demo.intersection.AABBox;
+import se.ltu.android.demo.util.BufferUtils;
 
 import android.util.Log;
 
@@ -46,6 +47,18 @@ public class TriMesh extends Spatial {
 		modelBound = new AABBox();
 	}
 	
+	public TriMesh(String name, FloatBuffer vertices, CharBuffer indices) {
+		super(name);
+		if(vertices.limit() % 3 != 0) {
+			Log.e(TAG, "Invalid vertex array length (Found: "
+					+vertices.limit()+", not divisable by 3) in "+name);
+			return;
+		}
+		vertexCount = vertices.limit() / 3;
+		this.vertices = vertices;
+		this.indices = indices;
+	}
+
 	/**
 	 * Creates a clone of this mesh. 
 	 * The clone shares vertices, indices etc
@@ -56,7 +69,6 @@ public class TriMesh extends Spatial {
 	 */
 	public TriMesh cloneMesh() {
 		return cloneMesh(name);
-		
 	}
 	
 	/**
@@ -147,21 +159,40 @@ public class TriMesh extends Spatial {
 			return;
 		}
 		if(colors == null || colors.capacity() != size) {
-			colors = allocateByteBuffer(size);
+			colors = BufferUtils.createByteBuffer(size);
 		}
 		colors.clear();
 		colors.put(colorArray);
 		return;
 	}
 	
+	public void setDrawMode(int mode) {
+		if(mode != MODE_TRIANGLE_FAN ||
+		   mode != MODE_TRIANGLE_STRIP ||
+		   mode != MODE_TRIANGLES) {
+			Log.e(TAG, "Unrecognized draw mode");
+			return;
+		}
+		drawMode = mode;
+	}
+	
 	public void setIndices(char[] indexArray) {
 		int size = indexArray.length;
 		if(indices == null || indices.capacity() != size) {
-			indices = allocateCharBuffer(size);
+			indices = BufferUtils.createCharBuffer(size);
 		}
 		indices.clear();
 		indices.put(indexArray);
 		return;
+	}
+	
+	/**
+	 * Sets the bounding volume.
+	 * @param bound custom bounding volume
+	 */
+	public void setModelBound(AABBox bound) {
+		modelBound = bound;
+		hasDirtyModelBound = false;
 	}
 	
 	/**
@@ -177,7 +208,7 @@ public class TriMesh extends Spatial {
 			return;
 		}
 		if(normals == null || normals.capacity() != size) {
-			normals = allocateFloatBuffer(size);
+			normals = BufferUtils.createFloatBuffer(size);
 		}
 		normals.clear();
 		normals.put(normalArray);
@@ -217,7 +248,7 @@ public class TriMesh extends Spatial {
 			return;
 		}
 		if(colors == null || colors.capacity() != vertexCount*4) {
-			colors = allocateByteBuffer(4*vertexCount);
+			colors = BufferUtils.createByteBuffer(4*vertexCount);
 		}
 		colors.clear();
 		for(int i = 0; i < vertexCount; i++) {
@@ -239,7 +270,7 @@ public class TriMesh extends Spatial {
 			return;
 		}
 		if(texcoords == null || texcoords.capacity() != size) {
-			texcoords = allocateFloatBuffer(size);
+			texcoords = BufferUtils.createFloatBuffer(size);
 		}
 		texcoords.clear();
 		texcoords.put(texcoordsArray);
@@ -250,19 +281,21 @@ public class TriMesh extends Spatial {
 	 * @param normals
 	 * @return
 	 */
-	protected void setVertices(float[] vertexArray) {
+	public void setVertices(float[] vertexArray) {
 		int size = vertexArray.length;
+		/*
 		if(vertices != null) {
 			Log.e(TAG, "Setting vertices twice is forbidden! In "+name);
 			return;
 		}
+		*/
 		if(size % 3 != 0) {
 			Log.e(TAG, "Invalid vertex array length (Found: "
 					+size+", not divisable by 3) in "+name);
 			return;
 		}
 		vertexCount = size/3;
-		vertices = allocateFloatBuffer(size);
+		vertices = BufferUtils.createFloatBuffer(size);
 		vertices.clear();
 		vertices.put(vertexArray);
 		hasDirtyModelBound = true;
@@ -328,23 +361,5 @@ public class TriMesh extends Spatial {
 		if(propagate && parent != null) {
 			parent.updateWorldBound(this);
 		}
-	}
-	
-	private FloatBuffer allocateFloatBuffer(int size) {
-		ByteBuffer bb = ByteBuffer.allocateDirect(4*size);
-		bb.order(ByteOrder.nativeOrder());
-		return bb.asFloatBuffer();
-	}
-	
-	private CharBuffer allocateCharBuffer(int size) {
-		ByteBuffer bb = ByteBuffer.allocateDirect(2*size);
-		bb.order(ByteOrder.nativeOrder());
-		return bb.asCharBuffer();
-	}
-	
-	private ByteBuffer allocateByteBuffer(int size) {
-		ByteBuffer bb = ByteBuffer.allocateDirect(size);
-		bb.order(ByteOrder.nativeOrder());
-		return bb;
 	}
 }

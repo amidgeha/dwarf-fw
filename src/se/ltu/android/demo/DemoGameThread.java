@@ -1,10 +1,13 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo;
 
-import android.util.Log;
+import java.io.IOException;
+import java.io.InputStream;
+
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.intersection.PickResult;
 import se.ltu.android.demo.intersection.Ray;
+import se.ltu.android.demo.model.Object3D;
 import se.ltu.android.demo.scene.Node;
 import se.ltu.android.demo.scene.Spatial;
 import se.ltu.android.demo.scene.TriMesh;
@@ -129,6 +132,7 @@ public class DemoGameThread extends Thread {
 	private void createWorld() {
     	world = new Node("Root Node");
     	Node room = new Node("room");
+    	TriMesh mesh;
     	Node board;
     	Quad quad;
     	Box box;
@@ -176,10 +180,18 @@ public class DemoGameThread extends Thread {
     	
     	board = createBoard();
     	
-    	box = new Box("piece", 0.60f, 0.60f, 0.80f);
-    	box.setLocalTranslation(-2.5f, -2.5f, 0.5f);
-    	box.setSolidColor(GLColor.BLACK);
-    	room.attachChild(box);
+    	InputStream stream1 = mGLView.getContext().getResources().openRawResource(R.raw.pawn);
+    	InputStream stream2 = mGLView.getContext().getResources().openRawResource(R.raw.pawn);
+    	
+    	try {
+			mesh = Object3D.loadModel("piece", stream1, stream2);
+			mesh.setLocalTranslation(-2.5f, -2.5f, 0.5f);
+	    	mesh.setSolidColor(GLColor.ORANGE);
+	    	room.attachChild(mesh);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	//box = new Box("piece", 0.60f, 0.60f, 0.80f);
     	
     	
     	/*
