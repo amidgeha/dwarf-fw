@@ -2,14 +2,12 @@
 package se.ltu.android.demo.model;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 
-import se.ltu.android.demo.R;
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.scene.TriMesh;
 import se.ltu.android.demo.util.BufferUtils;
@@ -35,8 +33,8 @@ import se.ltu.android.demo.util.BufferUtils;
 public abstract class Object3D {
 	private static CharBuffer indices;
 	private static FloatBuffer vertices;
-	//private FloatBuffer texcoords;
-	//private FloatBuffer normals;
+	private static FloatBuffer texcoords;
+	private static FloatBuffer normals;
 	
 	// for allocating buffers
 	private static int nVertices = 0;
@@ -66,6 +64,8 @@ public abstract class Object3D {
 		count(in);
 		vertices = BufferUtils.createFloatBuffer(3 * nVertices);
 		indices = BufferUtils.createCharBuffer(nFaces * nVertsPerFace);
+		normals = BufferUtils.createFloatBuffer(3 * nNormals);
+		texcoords = BufferUtils.createFloatBuffer(3 * nTexCoords);
 		in = new BufferedReader(new InputStreamReader(stream2));
 		// load the model
 		load(in);
@@ -156,27 +156,25 @@ public abstract class Object3D {
 					}
 					
 				}
-				/*
 				else if (line.charAt(0) == 'v' && line.charAt(1) == 't') {
 					
-					dataStrings = line.split("\\s+");
-					data3f[0] = Float.parseFloat(dataStrings[1]);
-					data3f[1] = Float.parseFloat(dataStrings[2]);
+					lineSplit = line.split("\\s+");
+					data3f[0] = Float.parseFloat(lineSplit[1]);
+					data3f[1] = Float.parseFloat(lineSplit[2]);
 					texcoords.put(data3f, 0, 2);
 					
 				}
 				else if (line.charAt(0) == 'v' && line.charAt(1) == 'n') {
 					
-					dataStrings = line.split("\\s+");
-					data3f[0] = Float.parseFloat(dataStrings[1]);
-					data3f[1] = Float.parseFloat(dataStrings[2]);
-					data3f[2] = Float.parseFloat(dataStrings[3]);
+					lineSplit = line.split("\\s+");
+					data3f[0] = Float.parseFloat(lineSplit[1]);
+					data3f[1] = Float.parseFloat(lineSplit[2]);
+					data3f[2] = Float.parseFloat(lineSplit[3]);
 					
 					// TODO normalize, create vertex utility class?
 					normals.put(data3f);
 					
 				}
-				*/
 				else if (line.charAt(0) == 'f' && line.charAt(1) == ' ') {
 					
 					lineSplit = line.split("\\s+");

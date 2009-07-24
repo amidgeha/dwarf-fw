@@ -7,7 +7,9 @@ import java.io.InputStream;
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.intersection.PickResult;
 import se.ltu.android.demo.intersection.Ray;
+import se.ltu.android.demo.light.Light;
 import se.ltu.android.demo.model.Object3D;
+import se.ltu.android.demo.scene.LightNode;
 import se.ltu.android.demo.scene.Node;
 import se.ltu.android.demo.scene.Spatial;
 import se.ltu.android.demo.scene.TriMesh;
@@ -185,7 +187,8 @@ public class DemoGameThread extends Thread {
     	
     	try {
 			mesh = Object3D.loadModel("piece", stream1, stream2);
-			mesh.setLocalTranslation(-2.5f, -2.5f, 0.5f);
+			mesh.setLocalTranslation(-2.5f, -2.5f, 0.1f);
+			//mesh.setLocalScale(2, 2, 2);
 	    	mesh.setSolidColor(GLColor.ORANGE);
 	    	room.attachChild(mesh);
 		} catch (IOException e) {
@@ -221,8 +224,16 @@ public class DemoGameThread extends Thread {
     	});
     	*/
 		
+		Light light = new Light();
+		light.setPosition(1, 1, 1, 0);
+		light.setAmbient(0.1f, 0.1f, 0.1f, 1);
+		light.setDiffuse(0.7f, 0.7f, 0.7f, 1);
+		light.setSpecular(1, 1, 1, 1);
+		LightNode lNode = new LightNode("light", light);
+		
     	room.attachChild(board);
-		world.attachChild(room);
+    	lNode.attachChild(room);
+		world.attachChild(lNode);
 		world.updateTransform();
 		world.updateWorldBound(false);
 	}

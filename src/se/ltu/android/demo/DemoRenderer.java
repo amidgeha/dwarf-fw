@@ -55,7 +55,6 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		// Disable default features to increase performance
 		gl.glDisable(GL10.GL_DITHER);
-		gl.glDisable(GL10.GL_LIGHTING);
 		
 		// One-time OpenGL initialization based on context...
         gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
@@ -64,6 +63,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         gl.glClearColor(0, 0, 0, 1);      
         gl.glEnable(GL10.GL_CULL_FACE);
         gl.glEnable(GL10.GL_DEPTH_TEST);
+        gl.glEnable(GL10.GL_LIGHTING);
+        gl.glEnable(GL10.GL_COLOR_MATERIAL);
         gl.glDepthFunc(GL10.GL_LEQUAL);
         gl.glShadeModel(GL10.GL_SMOOTH);
     }
