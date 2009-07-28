@@ -179,4 +179,24 @@ public class Node extends Spatial {
 			children.get(i).update(tpf);
 		}
 	}
+
+	/**
+	 * @param gl
+	 */
+	public void freeHardwareBuffers(GL10 gl) {
+		int len = children.size();
+		for (int i = 0; i < len; i++) {
+			children.get(i).freeHardwareBuffers(gl);
+		}
+	}
+
+	/**
+	 * @param gl
+	 */
+	public void generateHardwareBuffers(GL10 gl) {
+		int len = children.size();
+		for (int i = 0; i < len; i++) {
+			children.get(i).generateHardwareBuffers(gl);
+		}
+	}
 }

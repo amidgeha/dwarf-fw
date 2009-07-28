@@ -8,6 +8,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.opengles.GL11;
 
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.util.BufferUtils;
@@ -41,6 +42,14 @@ public class TriMesh extends Spatial {
 	protected FloatBuffer texcoords;
 	protected boolean hasDirtyModelBound = true;
 	protected TriMesh cloneTarget = null;
+	
+	// VBO buffer pointers
+	private int mVertBufferIndex;
+	private int mIndexBufferIndex;
+	private int mColorBufferIndex;
+	private int mNormalBufferIndex;
+	private int mTexCoordsBufferIndex;
+	private int mIndexCount;
 	
 	public TriMesh(String name) {
 		super(name);
@@ -116,34 +125,79 @@ public class TriMesh extends Spatial {
 		gl.glPushMatrix();
 		gl.glMultMatrixf(transM, 0);
 		
-		vertices.rewind();
-		gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
-		
-		// enable non-mandatory arrays if found
-		if(colors != null) {
-			colors.rewind();
-			gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-			gl.glColorPointer(4, GL10.GL_UNSIGNED_BYTE, 0, colors);
-		}
-		if(normals != null) {
-			normals.rewind();
-			gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
-			gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
-		}
-		
-		// do the drawing
-		indices.rewind();
-    	gl.glDrawElements(drawMode, indices.limit(), GL10.GL_UNSIGNED_SHORT, indices);
+		if (mVertBufferIndex == 0) {
+			
+			vertices.rewind();
+			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertices);
+			
+			// enable non-mandatory arrays if found
+			if(colors != null) {
+				colors.rewind();
+				gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
+				gl.glColorPointer(4, GL10.GL_UNSIGNED_BYTE, 0, colors);
+			}
+			if(normals != null) {
+				normals.rewind();
+				gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
+				gl.glNormalPointer(GL10.GL_FLOAT, 0, normals);
+			}
+			
+			// do the drawing
+			indices.rewind();
+	    	gl.glDrawElements(drawMode, indices.limit(), GL10.GL_UNSIGNED_SHORT, indices);
+	    	
+	    	// disable non-mandatory arrays
+	    	if(colors != null) {
+	    		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
+	    	}
+	    	if(normals != null) {
+	    		gl.glDisableClientState(GL10.GL_NORMAL_ARRAY);
+	    	}
     	
-    	// disable non-mandatory arrays
-    	if(colors != null) {
-    		gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-    	}
-    	if(normals != null) {
-    		gl.glDisableClientState(GL10.GL_NORMAL_ARRAY);
-    	}
-    	
-    	gl.glPopMatrix();
+		} else { // use VBO's
+            GL11 gl11 = (GL11)gl;
+            
+            gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mVertBufferIndex);
+            gl11.glVertexPointer(3, GL11.GL_FLOAT, 0, 0);
+            
+            // enable non-mandatory arrays if found
+			if(mColorBufferIndex != 0) {
+				gl11.glEnableClientState(GL11.GL_COLOR_ARRAY);
+				gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mColorBufferIndex);
+				gl11.glColorPointer(4, GL11.GL_UNSIGNED_BYTE, 0, 0);
+			}
+			if(mNormalBufferIndex != 0) {
+				normals.rewind();
+				gl11.glEnableClientState(GL11.GL_NORMAL_ARRAY);
+				gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mNormalBufferIndex);
+				gl11.glNormalPointer(GL11.GL_FLOAT, 0, 0);
+			}
+			if(mTexCoordsBufferIndex != 0) {
+				gl11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+				gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mTexCoordsBufferIndex);
+				gl11.glTexCoordPointer(2, GL11.GL_FLOAT, 0, 0);
+			}
+            
+            gl11.glBindBuffer(GL11.GL_ELEMENT_ARRAY_BUFFER, mIndexBufferIndex);
+            gl11.glDrawElements(drawMode, mIndexCount,
+                    GL11.GL_UNSIGNED_SHORT, 0);
+            
+            gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
+            gl11.glBindBuffer(GL11.GL_ELEMENT_ARRAY_BUFFER, 0);
+            
+            if(mColorBufferIndex != 0) {
+				gl11.glDisableClientState(GL11.GL_COLOR_ARRAY);
+			}
+			if(mNormalBufferIndex != 0) {
+				normals.rewind();
+				gl11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
+			}
+			if(mTexCoordsBufferIndex != 0) {
+				gl11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);				
+			}
+        }
+		
+		gl.glPopMatrix();
 	}
 	
 	/**
@@ -215,6 +269,10 @@ public class TriMesh extends Spatial {
 		return;
 	}
 	
+	public void setNormals(FloatBuffer normals) {
+		this.normals = normals;
+	}
+	
 	/**
 	 * 
 	 * @param color4f
@@ -274,6 +332,10 @@ public class TriMesh extends Spatial {
 		}
 		texcoords.clear();
 		texcoords.put(texcoordsArray);
+	}
+	
+	public void setTexCoords(FloatBuffer texcoords) {
+		this.texcoords = texcoords;
 	}
 	
 	/**
@@ -362,4 +424,122 @@ public class TriMesh extends Spatial {
 			parent.updateWorldBound(this);
 		}
 	}
+	
+	/** 
+     * When the OpenGL ES device is lost, GL handles become invalidated.
+     * In that case, we just want to "forget" the old handles (without
+     * explicitly deleting them) and make new ones.
+     */
+    public void forgetHardwareBuffers() {
+        mVertBufferIndex = 0;
+        mIndexBufferIndex = 0;
+        mNormalBufferIndex = 0;
+        mTexCoordsBufferIndex = 0;
+        mColorBufferIndex = 0;
+    }
+    
+    /**
+     * Deletes the hardware buffers allocated by this object (if any).
+     */
+    public void freeHardwareBuffers(GL10 gl) {
+        if (mVertBufferIndex != 0) {
+            if (gl instanceof GL11) {
+                GL11 gl11 = (GL11)gl;
+                int[] buffer = new int[1];
+                buffer[0] = mVertBufferIndex;
+                gl11.glDeleteBuffers(1, buffer, 0);
+                
+                buffer[0] = mIndexBufferIndex;
+                gl11.glDeleteBuffers(1, buffer, 0);
+                
+                if(mNormalBufferIndex != 0) {
+                	buffer[0] = mNormalBufferIndex;
+                	gl11.glDeleteBuffers(1, buffer, 0);
+                }
+                if(mTexCoordsBufferIndex != 0) {
+                	buffer[0] = mTexCoordsBufferIndex;
+                	gl11.glDeleteBuffers(1, buffer, 0);
+                }
+                if(mColorBufferIndex != 0) {
+                	buffer[0] = mColorBufferIndex;
+                	gl11.glDeleteBuffers(1, buffer, 0);
+                }
+            }
+            forgetHardwareBuffers();
+        }
+    }
+    
+    /** 
+     * Allocates hardware buffers on the graphics card and fills them with
+     * data if a buffer has not already been previously allocated.  Note that
+     * this function uses the GL_OES_vertex_buffer_object extension, which is
+     * not guaranteed to be supported on every device.
+     * @param gl  A pointer to the OpenGL ES context.
+     */
+    public void generateHardwareBuffers(GL10 gl) {
+        if (mVertBufferIndex == 0) {
+            if (gl instanceof GL11) {
+                GL11 gl11 = (GL11)gl;
+                int[] buffer = new int[1];
+                
+                vertices.rewind();
+                indices.rewind();
+                
+                // Allocate and fill the vertex buffer.
+                gl11.glGenBuffers(1, buffer, 0);
+                mVertBufferIndex = buffer[0];
+                gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mVertBufferIndex);
+                final int vertexSize = vertices.capacity() * 4;
+                gl11.glBufferData(GL11.GL_ARRAY_BUFFER, vertexSize, 
+                        vertices, GL11.GL_STATIC_DRAW);
+                
+                if(normals != null) {
+                	normals.rewind();
+                	gl11.glGenBuffers(1, buffer, 0);
+                    mNormalBufferIndex = buffer[0];
+                    gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mNormalBufferIndex);
+                    final int normalSize = normals.capacity() * 4;
+                    gl11.glBufferData(GL11.GL_ARRAY_BUFFER, normalSize, 
+                            normals, GL11.GL_STATIC_DRAW);
+                }
+                if(colors != null) {
+                	colors.rewind();
+                	gl11.glGenBuffers(1, buffer, 0);
+                    mColorBufferIndex = buffer[0];
+                    gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mColorBufferIndex);
+                    final int colorSize = colors.capacity();
+                    gl11.glBufferData(GL11.GL_ARRAY_BUFFER, colorSize, 
+                            colors, GL11.GL_STATIC_DRAW);
+                }
+                if(texcoords != null) {
+                	texcoords.rewind();
+                	gl11.glGenBuffers(1, buffer, 0);
+                    mTexCoordsBufferIndex = buffer[0];
+                    gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mTexCoordsBufferIndex);
+                    final int texcoordSize = texcoords.capacity() * 4;
+                    gl11.glBufferData(GL11.GL_ARRAY_BUFFER, texcoordSize, 
+                            texcoords, GL11.GL_STATIC_DRAW);
+                }
+                
+                // Unbind the array buffer.
+                gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
+                
+                // Allocate and fill the index buffer.
+                gl11.glGenBuffers(1, buffer, 0);
+                mIndexBufferIndex = buffer[0];
+                gl11.glBindBuffer(GL11.GL_ELEMENT_ARRAY_BUFFER, 
+                        mIndexBufferIndex);
+                // A char is 2 bytes.
+                final int indexSize = indices.capacity() * 2;
+                gl11.glBufferData(GL11.GL_ELEMENT_ARRAY_BUFFER, indexSize, indices, GL11.GL_STATIC_DRAW);
+                
+                // Unbind the element array buffer.
+                gl11.glBindBuffer(GL11.GL_ELEMENT_ARRAY_BUFFER, 0);
+                
+                mIndexCount = indices.limit();
+                
+                // TODO are we safe so delete the java.nio.buffers now??
+            }
+        }
+    }
 }
