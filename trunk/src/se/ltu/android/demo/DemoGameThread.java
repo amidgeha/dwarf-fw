@@ -42,6 +42,7 @@ public class DemoGameThread extends Thread {
 	}
 	
 	public void run() {
+		mGLView.getRenderer().useVBOs(true);
 		createWorld();
 		mGLView.getRenderer().setScene(world);
 		
@@ -78,7 +79,7 @@ public class DemoGameThread extends Thread {
 	    //updateAnimations();
 	    world.update(timePerFrame);
 	    //updateSound();
-		mGLView.requestRender();
+		//mGLView.requestRender();
 	}
 	
 	private void updateInput() {
@@ -181,13 +182,14 @@ public class DemoGameThread extends Thread {
     	room.attachChild(quad);
     	
     	board = createBoard();
+    	board.setLocalTranslation(0, 0, -2.9f);
     	
     	InputStream stream1 = mGLView.getContext().getResources().openRawResource(R.raw.pawn);
     	InputStream stream2 = mGLView.getContext().getResources().openRawResource(R.raw.pawn);
     	
     	try {
-			mesh = Object3D.loadModel("piece", stream1, stream2);
-			mesh.setLocalTranslation(-2.5f, -2.5f, 0.1f);
+			mesh = new Object3D().loadModel("piece", stream1, stream2);
+			mesh.setLocalTranslation(-2.5f, -2.5f, -2.8f);
 			//mesh.setLocalScale(2, 2, 2);
 	    	mesh.setSolidColor(GLColor.ORANGE);
 	    	room.attachChild(mesh);
@@ -225,10 +227,10 @@ public class DemoGameThread extends Thread {
     	*/
 		
 		Light light = new Light();
-		light.setPosition(1, 1, 1, 0);
-		light.setAmbient(0.1f, 0.1f, 0.1f, 1);
-		light.setDiffuse(0.7f, 0.7f, 0.7f, 1);
-		light.setSpecular(1, 1, 1, 1);
+		light.setPosition(new float[]{-1, 1, 1, 0});
+		light.setAmbient(new float[]{0.1f, 0.1f, 0.1f, 1});
+		light.setDiffuse(new float[]{0.8f, 0.8f, 0.8f, 1});
+		light.setSpecular(new float[]{1, 1, 1, 1});
 		LightNode lNode = new LightNode("light", light);
 		
     	room.attachChild(board);

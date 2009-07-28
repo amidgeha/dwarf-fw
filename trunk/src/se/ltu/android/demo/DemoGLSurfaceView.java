@@ -5,7 +5,6 @@ import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.opengl.GLSurfaceView;
 import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -19,17 +18,19 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 	private final static String TAG = "DemoGLSurfaceView";
 	private DemoRenderer mRenderer;
 	private SensorHandler mSensorHandler;
+	private float mx;
+	private float my;
 
 	public DemoGLSurfaceView(DemoActivity context, SensorHandler handler) {
 		super(context);
 		//setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
 		// We need a surface with a depth buffer and an alpha channel
-		setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+		//setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 		getHolder().setFormat(PixelFormat.RGBA_8888);
 		mSensorHandler = handler;
 		mRenderer = new DemoRenderer(handler);
 		setRenderer(mRenderer);
-		setRenderMode(RENDERMODE_WHEN_DIRTY);
+		//setRenderMode(RENDERMODE_WHEN_DIRTY);
 	}
 	
 	public DemoRenderer getRenderer() {
@@ -55,13 +56,25 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 		long downtime = event.getEventTime() - event.getDownTime();
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
+			mx = event.getX();
+			my = event.getY();
 			// Log.d(TAG, "Touch down");
+		case MotionEvent.ACTION_MOVE:
+			break;
 		case MotionEvent.ACTION_UP:
+			Log.d(TAG, "Touch up "+downtime);
 			if (downtime > 0 && downtime < 400) {
-				// Log.d(TAG, "Touch up " + event.getX() + ", " + event.getY());
-				queueEvent(new Runnable() {
+				setEvent(new Runnable() {
 					public void run() {
-						mRenderer.pick(event.getX(), event.getY());
+						mRenderer.pick(mx, my);
+					}
+				});
+				
+			}
+			if (downtime > 1000) {
+				setEvent(new Runnable() {
+					public void run() {
+						mRenderer.changeCamera();
 					}
 				});
 			}

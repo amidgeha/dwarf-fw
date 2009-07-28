@@ -243,4 +243,8 @@ public abstract class Spatial {
 			}
 		}
 	}
+
+	public abstract void freeHardwareBuffers(GL10 gl);
+
+	public abstract void generateHardwareBuffers(GL10 gl);
 }

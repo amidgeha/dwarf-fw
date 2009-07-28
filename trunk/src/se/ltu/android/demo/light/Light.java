@@ -31,6 +31,7 @@ public class Light {
 	
 	public Light() {
 		lightState = GlobalLightState.getInstance();
+		glLight = lightState.checkOut();
 	}
 	
 	public Light copy() {
@@ -51,7 +52,6 @@ public class Light {
 	 * Should be called inside the scene traversal. 
 	 */
 	public void enable(GL10 gl) {
-		glLight = lightState.checkOut();
 		if(glLight == -1) {
 			return;
 		}
@@ -94,43 +94,98 @@ public class Light {
 	}
 	
 	public void setAmbient(float r, float g, float b, float a) {
-		setComponents(ambient4f, r, g, b, a);
+		// TODO
 	}
 	
 	public void setAmbient(float[] rgba4f) {
-		setArray(ambient4f, rgba4f, 4);
+		if(rgba4f == null) {
+			ambient4f = null;
+			return;
+		}
+		if(rgba4f.length == 4) {
+			if(ambient4f == null) {
+				ambient4f = new float[4];
+			}
+			for(int i = 0; i < 4; i++) {
+				ambient4f[i] = rgba4f[i];
+			}
+		}
 	}
 	
 	public void setDiffuse(float r, float g, float b, float a) {
-		setComponents(diffuse4f, r, g, b, a);
+		// TODO
 	}
 	
 	public void setDiffuse(float[] rgba4f) {
-		setArray(diffuse4f, rgba4f, 4);
+		if(rgba4f == null) {
+			diffuse4f = null;
+			return;
+		}
+		if(rgba4f.length == 4) {
+			if(diffuse4f == null) {
+				diffuse4f = new float[4];
+			}
+			for(int i = 0; i < 4; i++) {
+				diffuse4f[i] = rgba4f[i];
+			}
+		}
 	}
 	
 	public void setPosition(float x, float y, float z, float w) {
-		setComponents(pos4f, x, y, z, w);
+		// TODO
 	}
 	
 	public void setPosition(float[] vector4f) {
-		setArray(pos4f, vector4f, 4);
+		if(vector4f == null) {
+			pos4f = null;
+			return;
+		}
+		if(vector4f.length == 4) {
+			if(pos4f == null) {
+				pos4f = new float[4];
+			}
+			for(int i = 0; i < 4; i++) {
+				pos4f[i] = vector4f[i];
+			}
+		}
 	}
 	
 	public void setSpecular(float r, float g, float b, float a) {
-		setComponents(specular4f, r, g, b, a);
+		// TODO
 	}
 	
 	public void setSpecular(float[] rgba4f) {
-		setArray(specular4f, rgba4f, 4);
+		if(rgba4f == null) {
+			specular4f = null;
+			return;
+		}
+		if(rgba4f.length == 4) {
+			if(specular4f == null) {
+				specular4f = new float[4];
+			}
+			for(int i = 0; i < 4; i++) {
+				specular4f[i] = rgba4f[i];
+			}
+		}
 	}
 	
 	public void setSpotDirection(float x, float y, float z) {
-		setComponents(spot_dir3f, x, y, z);
+		// TODO
 	}
 	
 	public void setSpotDirection(float[] vector3f) {
-		setArray(spot_dir3f, vector3f, 3);
+		if(vector3f == null) {
+			spot_dir3f = null;
+			return;
+		}
+		if(vector3f.length == 4) {
+			if(spot_dir3f == null) {
+				spot_dir3f = new float[3];
+			}
+			for(int i = 0; i < 4; i++) {
+				spot_dir3f[i] = vector3f[i];
+			}
+		}
 	}
 	
 	public void setSpotCutoff(float cutoff) {
@@ -141,40 +196,5 @@ public class Light {
 	public void setSpotExponent(float exponent) {
 		has_spot_exponent = true;
 		spot_exponent = exponent;
-	}
-	
-	// convenience methods below
-	private void setArray(float[] storage, float[] data, int length) {
-		if(data == null) {
-			storage = null;
-			return;
-		}
-		if(data.length == length) {
-			if(storage == null) {
-				storage = new float[4];
-			}
-			for(int i = 0; i < length; i++) {
-				storage[i] = data[i];
-			}
-		}
-	}
-	
-	private void setComponents(float[] storage, float c0, float c1, float c2) {
-		if(storage == null) {
-			storage = new float[3];
-		}
-		storage[0] = c0;
-		storage[1] = c1;
-		storage[2] = c2;
-	}
-	
-	private void setComponents(float[] storage, float c0, float c1, float c2, float c3) {
-		if(storage == null) {
-			storage = new float[4];
-		}
-		storage[0] = c0;
-		storage[1] = c1;
-		storage[2] = c2;
-		storage[3] = c3;
 	}
 }

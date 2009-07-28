@@ -69,7 +69,7 @@ public class DemoActivity extends Activity {
         // register listener for each sensor in sensors
         for (Sensor sensor : sensors) {
 			mSensorManager.registerListener(mGLView, 
-					sensor, SensorManager.SENSOR_DELAY_FASTEST);
+					sensor, SensorManager.SENSOR_DELAY_GAME);
 		}
     }
     

@@ -1,6 +1,7 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo;
 
+import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
@@ -11,7 +12,6 @@ import se.ltu.android.demo.scene.shapes.*;
 import se.ltu.android.demo.util.GLColor;
 import se.ltu.android.demo.util.GLExtras;
 
-import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.os.Debug;
@@ -29,6 +29,9 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	private final float ZNEAR = 1.0f;
 	private final float ZFAR = 20.0f;
 	private final static String TAG = "RENDERER";
+	private static final int CAMERA_1 = 0;
+	private static final int CAMERA_2 = 1;
+	private static final int CAMERA_3 = 2;
 	
 	// keeps track of current orientation
 	float[] orient = {0.f, 0.f, 0.f};
@@ -46,13 +49,16 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	private float pickX = -1;
 	private float pickY = -1;
 	private Ray pickRay;
+	private int cam_mode = CAMERA_1;
+	private boolean use_vbos = false;
+	private boolean has_vbos = false;
 	
 	public DemoRenderer(SensorHandler handler) {
 		mSensorHandler = handler;
 		lastFrame = System.currentTimeMillis();
 	}
 
-	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+	public void surfaceCreated(GL10 gl) {
 		// Disable default features to increase performance
 		gl.glDisable(GL10.GL_DITHER);
 		
@@ -62,6 +68,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 		
         gl.glClearColor(0, 0, 0, 1);      
         gl.glEnable(GL10.GL_CULL_FACE);
+        gl.glCullFace(GL10.GL_BACK);
         gl.glEnable(GL10.GL_DEPTH_TEST);
         gl.glEnable(GL10.GL_LIGHTING);
         gl.glEnable(GL10.GL_COLOR_MATERIAL);
@@ -69,7 +76,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         gl.glShadeModel(GL10.GL_SMOOTH);
     }
 
-    public void onSurfaceChanged(GL10 gl, int w, int h) {
+    public void sizeChanged(GL10 gl, int w, int h) {
     	width = w;
     	height = h;
     	aspect = (float) w / h;
@@ -81,22 +88,47 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         //GLExtras.gluPerspective(FOVY, aspect, ZNEAR, ZFAR, projM);
         //gl.glLoadMatrixf(projM, 0);
     }
+    
+    public void shutdown(GL10 gl) {
+		if (use_vbos) {
+			//scene.freeHardwareBuffers(gl);
+        }
+    }
 
-	public void onDrawFrame(GL10 gl) {
+	public void drawFrame(GL10 gl) {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         
         // setup camera
         gl.glMatrixMode(GL10.GL_MODELVIEW);
-        //mSensorHandler.getRotM4(modelM);
-        //Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2]);
         Matrix.setIdentityM(modelM, 0);
-        Matrix.translateM(modelM, 0, 0, 0, -12);
-    	gl.glLoadMatrixf(modelM, 0);
+        if(cam_mode == CAMERA_1) {
+        	Matrix.translateM(modelM, 0, 0, 0, -9);
+        }
+        else if(cam_mode == CAMERA_2) {
+        	GLExtras.gluLookAt(5, 5, 3, 0, 0, -2.9f, 0, 0, 1, modelM);
+        	//Matrix.translateM(modelM, 0, 0, 0, -12);
+        }
+        else {
+        	GLExtras.gluLookAt(6, 0, 6, 0, 0, -2.9f, 0, 0, 1, modelM);
+        }
+        gl.glLoadMatrixf(modelM, 0);
+        /*
+        if(cam_mode == CAMERA_LOCKED) {
+        	gl.glLoadMatrixf(modelM, 0);
+        } else {
+        	mSensorHandler.getRotM4(modelM);
+            //Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2]);
+        }*/
              
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         
         // draw the world
         if(scene != null) {
+        	if(use_vbos && !has_vbos) {
+    			// FIXME messy...
+    			has_vbos = true;
+    			scene.generateHardwareBuffers(gl);
+    		}
         	//Debug.startMethodTracing("Draw scene");
         	scene.draw(gl);
         	//Debug.stopMethodTracing();
@@ -168,5 +200,38 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 		Ray retRay = pickRay;
 		pickRay = null;
 		return retRay;
+	}
+
+	/**
+	 * 
+	 */
+	public void changeCamera() {
+		if(cam_mode == CAMERA_1) {
+			cam_mode = CAMERA_2;
+		} else if(cam_mode == CAMERA_2) {
+			cam_mode = CAMERA_3;
+		} else {
+			cam_mode = CAMERA_1;
+		}
+	}
+	
+	public void useVBOs(boolean value) {
+		use_vbos = true;
+	}
+
+	/* (non-Javadoc)
+	 * @see se.ltu.android.demo.GLSurfaceView.Renderer#getConfigSpec()
+	 */
+	@Override
+	public int[] getConfigSpec() {
+		int[] configSpec = {
+                EGL10.EGL_RED_SIZE,      8,
+                EGL10.EGL_GREEN_SIZE,    8,
+                EGL10.EGL_BLUE_SIZE,     8,
+                EGL10.EGL_ALPHA_SIZE,    8,
+                EGL10.EGL_DEPTH_SIZE,   16,
+                EGL10.EGL_NONE
+        };
+        return configSpec;
 	}
 }
