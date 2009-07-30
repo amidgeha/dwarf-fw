@@ -1,18 +1,8 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.intersection;
 
-import android.opengl.Matrix;
-import android.util.Log;
-
 /**
- * A ray
- * 
- * The ray with intersection tests is heavily based upon the following:
- * 
- * "Fast Ray / Axis-Aligned Bounding Box Overlap Tests using Ray Slopes" 
- * by Martin Eisemann, Thorsten Grosch, Stefan Müller and Marcus Magnor
- * Computer Graphics Lab, TU Braunschweig, Germany and
- * University of Koblenz-Landau, Germany
+ * A ray with methods for AABB intersection tests
  * 
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$

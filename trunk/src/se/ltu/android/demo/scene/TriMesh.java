@@ -2,10 +2,8 @@
 package se.ltu.android.demo.scene;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
@@ -13,6 +11,7 @@ import javax.microedition.khronos.opengles.GL11;
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.util.BufferUtils;
 
+import android.opengl.Matrix;
 import android.util.Log;
 
 /**
@@ -35,8 +34,12 @@ public class TriMesh extends Spatial {
 	protected float[] center = {0.0f, 0.0f, 0.0f};
 	//use char instead of short since char is unsigned (both 2-bytes long) 
 	protected CharBuffer indices;
-	//private, so no one can circumvent the hasDirtyModelBound check
-	private FloatBuffer vertices;
+	/**
+	 * Direct access to this TriMesh's vertices. If you modify this data
+	 * you must set the hasDirtyModelBound to true or the model bound
+	 * will not be updated.
+	 */
+	protected FloatBuffer vertices;
 	protected FloatBuffer normals;
 	protected ByteBuffer colors;
 	protected FloatBuffer texcoords;
@@ -365,6 +368,13 @@ public class TriMesh extends Spatial {
 	}
 	
 	/**
+	 * @return a read-only FloatBuffer with this TriMesh's vertices
+	 */
+	public FloatBuffer getVertices() {
+		return vertices.asReadOnlyBuffer();
+	}
+	
+	/**
 	 * Updates the bounding volume for this mesh
 	 * This method uses the mesh's world transformation matrix so
 	 * ensure that the matrix is valid (or call updateTransform() on
@@ -543,4 +553,27 @@ public class TriMesh extends Spatial {
             }
         }
     }
+
+	/**
+	 * Prior to this call, you should call updateTransform()
+	 * if the transformation matrix has not already been calculated. 
+	 * @return an array with the vertices
+	 */
+	public float[] getWorldVertices() {
+		vertices.clear();
+		int len = vertices.limit();
+		float[] world_vectors = new float[len];
+		// Homogeneous coordinates
+		float[] world_v = new float[4];
+		float[] local_v = {0,0,0,1}; // last digit should never change (an opengl point)
+		for(int i = 0; i < len; i += 3) {
+			vertices.get(local_v, 0, 3);
+			Matrix.multiplyMV(world_v, 0, transM, 0, local_v, 0);
+			world_vectors[i] = world_v[0];
+			world_vectors[i+1] = world_v[1];
+			world_vectors[i+2] = world_v[2];
+			//Log.d(TAG, "W Vector: ("+world_v[0]+", "+world_v[1]+", "+world_v[2]+")");
+		}
+		return world_vectors;
+	}
 }
