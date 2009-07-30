@@ -171,9 +171,14 @@ public class GLExtras {
     	undef M
     	*/
     	
-    	Matrix.multiplyMM(result, 0, m, 0, result, 0);
-    	Matrix.translateM(result, 0, -eyex, -eyey, -eyez);
+    	float[] new_result = new float[16]; 
+    	Matrix.multiplyMM(new_result, 0, m, 0, result, 0);
+    	Matrix.translateM(new_result, 0, -eyex, -eyey, -eyez);
     	//glMultMatrixd(m);
+    	
+    	for(int i = 0; i < 16; i++) {
+    		result[i] = new_result[i];
+    	}
 
     	/* Translate Eye to Origin */
     	//glTranslated(-eyex, -eyey, -eyez);

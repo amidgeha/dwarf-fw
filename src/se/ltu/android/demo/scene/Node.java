@@ -111,7 +111,7 @@ public class Node extends Spatial {
 					worldBound.maxZ = cBound.maxZ;
 			}
 		}
-		worldBound.transform(transM);
+		//worldBound.transform(transM);
 		
 		if(propagate && parent != null) {
 			parent.updateWorldBound(this);
@@ -166,8 +166,11 @@ public class Node extends Spatial {
 		
 		if(ray.intersects(worldBound)) {
 			int len = children.size();
-			for(int i = 0; i < len; i++) {
-				children.get(i).calculatePick(ray, result);
+			if(pickable) {
+				Log.d("Ray", "picked "+name);
+				for(int i = 0; i < len; i++) {
+					children.get(i).calculatePick(ray, result);
+				}
 			}
 		}
 	}

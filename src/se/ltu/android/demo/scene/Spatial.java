@@ -24,6 +24,7 @@ public abstract class Spatial {
 	protected String name = "unnamed node";
 	protected AABBox worldBound;
 	protected ArrayList<KeyFrameAnimation> animations;
+	protected Boolean pickable = true; 
 	
 	/**
 	 * Transformation matrix
@@ -209,9 +210,12 @@ public abstract class Spatial {
 			return;
 		}
 		
-		float[] distance = new float[1];
-		if(ray.intersects(worldBound, distance)) {
-			result.add(this, distance[0]);
+		if(pickable) {
+			float[] distance = new float[1];
+			if(ray.intersects(worldBound, distance)) {
+				Log.d("Ray", "picked "+name);
+				result.add(this, distance[0]);
+			}
 		}
 	}
 	
@@ -243,8 +247,20 @@ public abstract class Spatial {
 			}
 		}
 	}
+	
+	public String toString() {
+		return name;
+	}
 
 	public abstract void freeHardwareBuffers(GL10 gl);
 
 	public abstract void generateHardwareBuffers(GL10 gl);
+	
+	public void setPickable(boolean pickable) {
+		this.pickable = pickable;
+	}
+	
+	public boolean isPickable() {
+		return pickable;
+	}
 }

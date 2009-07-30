@@ -1,6 +1,10 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.FloatBuffer;
+
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -9,6 +13,7 @@ import javax.microedition.khronos.opengles.GL11;
 import se.ltu.android.demo.intersection.Ray;
 import se.ltu.android.demo.scene.Node;
 import se.ltu.android.demo.scene.shapes.*;
+import se.ltu.android.demo.util.BufferUtils;
 import se.ltu.android.demo.util.GLColor;
 import se.ltu.android.demo.util.GLExtras;
 
@@ -52,6 +57,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	private int cam_mode = CAMERA_1;
 	private boolean use_vbos = false;
 	private boolean has_vbos = false;
+	private Object pickLock = new Object();
+	private float[] pickLine;
 	
 	public DemoRenderer(SensorHandler handler) {
 		mSensorHandler = handler;
@@ -102,14 +109,23 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         gl.glMatrixMode(GL10.GL_MODELVIEW);
         Matrix.setIdentityM(modelM, 0);
         if(cam_mode == CAMERA_1) {
-        	Matrix.translateM(modelM, 0, 0, 0, -9);
+        	pos[0] = 0;
+        	pos[1] = 0;
+        	pos[2] = 9;
+        	Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2]);
         }
         else if(cam_mode == CAMERA_2) {
-        	GLExtras.gluLookAt(5, 5, 3, 0, 0, -2.9f, 0, 0, 1, modelM);
+        	pos[0] = 5;
+        	pos[1] = -5;
+        	pos[2] = 3;
+        	GLExtras.gluLookAt(pos[0], pos[1], pos[2], 0, 0, -2.9f, 0, 0, 1, modelM);
         	//Matrix.translateM(modelM, 0, 0, 0, -12);
         }
         else {
-        	GLExtras.gluLookAt(6, 0, 6, 0, 0, -2.9f, 0, 0, 1, modelM);
+        	pos[0] = 6;
+        	pos[1] = 0;
+        	pos[2] = 6;
+        	GLExtras.gluLookAt(pos[0], pos[1], pos[2], 0, 0, -2.9f, 0, 0, 1, modelM);
         }
         gl.glLoadMatrixf(modelM, 0);
         /*
@@ -131,8 +147,29 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     		}
         	//Debug.startMethodTracing("Draw scene");
         	scene.draw(gl);
+        	if(pickLine != null) {
+	        	FloatBuffer line = BufferUtils.createFloatBuffer(6);
+	        	line.rewind();
+	        	line.put(pickLine);
+	        	line.rewind();
+	        	gl.glVertexPointer(3, GL10.GL_FLOAT, 0, line);
+	        	FloatBuffer lineColor = BufferUtils.createFloatBuffer(8);
+	        	lineColor.rewind();
+	        	lineColor.put(new float[]{1,1,1,1,1,1,1,1});
+	        	lineColor.rewind();
+	        	gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
+	        	gl.glColorPointer(4, GL10.GL_FLOAT, 0, lineColor);
+	        	CharBuffer indices = BufferUtils.createCharBuffer(2);
+	        	indices.rewind();
+	        	indices.put(new char[]{0,1});
+	        	indices.rewind();
+	        	gl.glLineWidth(5.0f);
+	        	gl.glDrawElements(GL10.GL_LINES, 2, GL10.GL_UNSIGNED_SHORT, indices);
+	        	gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
+        	}
         	//Debug.stopMethodTracing();
         }
+        /*
         long now = System.currentTimeMillis();
         if(now - lastFrame >= 1000l) {
             Log.d(TAG, tmp=fps + " fps");
@@ -141,6 +178,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         } else {
         	fps++;
         }
+        */
         
         calcTouchRay(gl);
     }
@@ -163,21 +201,34 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     	float unit_x = centered_x/(width/2);
     	float unit_y = centered_y/(height/2);
     	
+    	//Log.d(TAG, "Pick: ("+pickX+", "+pickY+") - Unit: ("+unit_x+", "+unit_y+")");
+    	
 		float angle = FOVY * GLExtras.DEG_TO_RAD / 2.0f;
 		// defined as glFrustrumf(), that is, half the height.
-		float near_height = ZNEAR * FloatMath.sin(angle)/FloatMath.cos(angle);
+		float near_height = (float)(ZNEAR * Math.tan(angle)); // FloatMath.sin(angle)/FloatMath.cos(angle);
 		
-		float[] rayPos = {0.0f, 0.0f, 0.0f, 1.0f};
-		float[] rayDir = {unit_x * near_height * aspect, unit_y * near_height, -ZNEAR, 0.0f};
+		float[] rayRawPos = {0.0f, 0.0f, 0.0f, 1.0f};
+		float[] rayRawDir = {unit_x * near_height * aspect, unit_y * near_height, -ZNEAR, 0.0f};
+		float[] rayPos = new float[4];
+		float[] rayDir = new float[4];
 		
 		// multiply the position and vector with the inverse model matrix
 		// to get world coordinates
 		float[] invModelM = new float[16];
 		Matrix.invertM(invModelM, 0, modelM, 0);
-		Matrix.multiplyMV(rayPos, 0, invModelM, 0, rayPos, 0);
-		Matrix.multiplyMV(rayDir, 0, invModelM, 0, rayDir, 0);
-    	
-		pickRay = new Ray(rayPos[0], rayPos[1], rayPos[2], rayDir[0], rayDir[1], rayDir[2]);
+		Matrix.multiplyMV(rayPos, 0, invModelM, 0, rayRawPos, 0);
+		Matrix.multiplyMV(rayDir, 0, invModelM, 0, rayRawDir, 0);
+    	/*float invlen = 1/Matrix.length(rayDir[0], rayDir[1], rayDir[2]);
+    	rayDir[0] *= invlen;
+    	rayDir[1] *= invlen;
+    	rayDir[2] *= invlen;*/
+		Log.d(TAG, tmp="  Raw Ray pos: ("+rayRawPos[0]+", "+rayRawPos[1]+", "+rayRawPos[2]+") - dir: ("+rayRawDir[0]+", "+rayRawDir[1]+", "+rayRawDir[2]+")");
+		Log.d(TAG, tmp="World Ray pos: ("+rayPos[0]+", "+rayPos[1]+", "+rayPos[2]+") - dir: ("+rayDir[0]+", "+rayDir[1]+", "+rayDir[2]+")");
+		pickLine = new float[]{rayPos[0],rayPos[1],rayPos[2],rayPos[0]+20*rayDir[0],rayPos[1]+20*rayDir[1],rayPos[2]+20*rayDir[2]};
+		Log.d(TAG, "Line: ("+pickLine[0]+", "+pickLine[1]+", "+pickLine[2]+") -> ("+pickLine[3]+", "+pickLine[4]+", "+pickLine[5]+")");
+		synchronized(pickLock) {
+			pickRay = new Ray(rayPos[0], rayPos[1], rayPos[2], rayDir[0], rayDir[1], rayDir[2]);
+		}
 		//Log.d(TAG, tmp="Ray pos: "+pickRayPos[0]+", "+pickRayPos[1]+", "+pickRayPos[2]+
 		//		" - dir:"+pickRayDir[0]+", "+pickRayDir[1]+", "+pickRayDir[2]);
 		
@@ -197,9 +248,11 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 
 	// TODO this is really bad... do all rays in thread instead.
 	public Ray getPickRay() {
-		Ray retRay = pickRay;
-		pickRay = null;
-		return retRay;
+		synchronized(pickLock) {
+			Ray retRay = pickRay;
+			pickRay = null;
+			return retRay;
+		}
 	}
 
 	/**

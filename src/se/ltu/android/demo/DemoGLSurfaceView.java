@@ -58,7 +58,7 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 		case MotionEvent.ACTION_DOWN:
 			mx = event.getX();
 			my = event.getY();
-			// Log.d(TAG, "Touch down");
+			Log.d(TAG, "Touch down");
 		case MotionEvent.ACTION_MOVE:
 			break;
 		case MotionEvent.ACTION_UP:
