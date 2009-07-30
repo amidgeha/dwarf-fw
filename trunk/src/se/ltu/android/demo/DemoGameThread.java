@@ -4,6 +4,8 @@ package se.ltu.android.demo;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.util.Log;
+
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.intersection.PickResult;
 import se.ltu.android.demo.intersection.Ray;
@@ -17,6 +19,7 @@ import se.ltu.android.demo.scene.animation.KeyFrame;
 import se.ltu.android.demo.scene.animation.KeyFrameAnimation;
 import se.ltu.android.demo.scene.shapes.*;
 import se.ltu.android.demo.util.GLColor;
+import se.ltu.android.demo.util.GLExtras;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -87,6 +90,7 @@ public class DemoGameThread extends Thread {
 		if(pickRay != null) {
 			PickResult result = new PickResult();
 			world.calculatePick(pickRay, result);
+			Log.d(TAG, result.toString());
 			if(box != null) {
 				box.detachFromParent();
 			}
@@ -143,43 +147,54 @@ public class DemoGameThread extends Thread {
     	box = new Box("northW", 12.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(0.f, 6.5f, 0.f);
     	box.setSolidColor(GLColor.CYAN);
+    	box.setPickable(false);
     	room.attachChild(box);
     	
     	box = new Box("southW", 12.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(0.f, -6.5f, 0.f);
     	box.setSolidColor(GLColor.CYAN);
+    	box.setPickable(false);
     	room.attachChild(box);
     	  	
     	box = new Box("westW", 1.0f, 12.0f, 6.0f);
     	box.setLocalTranslation(-6.5f, 0.f, 0.f);
     	box.setSolidColor(GLColor.BLUE);
+    	box.setPickable(false);
     	room.attachChild(box);
     	
     	box = new Box("eastW", 1.0f, 12.0f, 6.0f);
     	box.setLocalTranslation(6.5f, 0.f, 0.f);
     	box.setSolidColor(GLColor.BLUE);
+    	box.setPickable(false);
     	room.attachChild(box);
     	
     	box = new Box("Cpillar1", 1.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(-6.5f, -6.5f, 0.f);
+    	box.setPickable(false);
     	room.attachChild(box);
     	
     	box = new Box("Cpillar2", 1.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(6.5f, -6.5f, 0.f);
+    	box.setPickable(false);
     	room.attachChild(box);
     	
     	box = new Box("Cpillar3", 1.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(6.5f, 6.5f, 0.f);
+    	box.setPickable(false);
     	room.attachChild(box);
     	
     	box = new Box("Cpillar4", 1.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(-6.5f, 6.5f, 0.f);
+    	box.setPickable(false);
     	room.attachChild(box);
-    		
+    	
+    	/*
     	quad = new Quad("floor", 12.0f, 12.0f);
     	quad.setLocalTranslation(0.0f, 0.0f, -3f);
     	quad.setSolidColor(new float[] {0.4f,0.4f,0.4f,1.0f});
+    	quad.setPickable(false);
     	room.attachChild(quad);
+    	*/
     	
     	board = createBoard();
     	board.setLocalTranslation(0, 0, -2.9f);
@@ -238,6 +253,8 @@ public class DemoGameThread extends Thread {
 		world.attachChild(lNode);
 		world.updateTransform();
 		world.updateWorldBound(false);
+		
+		//board.getChildren()
 	}
 
 	/**

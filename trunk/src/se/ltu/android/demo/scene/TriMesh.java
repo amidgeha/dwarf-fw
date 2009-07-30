@@ -476,6 +476,7 @@ public class TriMesh extends Spatial {
      * not guaranteed to be supported on every device.
      * @param gl  A pointer to the OpenGL ES context.
      */
+    
     public void generateHardwareBuffers(GL10 gl) {
         if (mVertBufferIndex == 0) {
             if (gl instanceof GL11) {
