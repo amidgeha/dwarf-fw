@@ -11,6 +11,7 @@ import se.ltu.android.demo.intersection.PickResult;
 import se.ltu.android.demo.intersection.Ray;
 import se.ltu.android.demo.light.Light;
 import se.ltu.android.demo.model.Object3D;
+import se.ltu.android.demo.scene.Board;
 import se.ltu.android.demo.scene.LightNode;
 import se.ltu.android.demo.scene.Node;
 import se.ltu.android.demo.scene.Spatial;
@@ -138,55 +139,61 @@ public class DemoGameThread extends Thread {
 
 	private void createWorld() {
     	world = new Node("Root Node");
-    	Node room = new Node("room");
     	TriMesh mesh;
-    	Node board;
+    	Board board;
     	Quad quad;
     	Box box;
+    	
+    	Light light = new Light();
+		light.setPosition(new float[]{-1, 1, 1, 0});
+		light.setAmbient(new float[]{0.1f, 0.1f, 0.1f, 1});
+		light.setDiffuse(new float[]{0.8f, 0.8f, 0.8f, 1});
+		light.setSpecular(new float[]{1, 1, 1, 1});
+		LightNode lNode = new LightNode("light", light);
     	   	  	
     	box = new Box("northW", 12.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(0.f, 6.5f, 0.f);
     	box.setSolidColor(GLColor.CYAN);
     	box.setPickable(false);
-    	room.attachChild(box);
+    	lNode.attachChild(box);
     	
     	box = new Box("southW", 12.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(0.f, -6.5f, 0.f);
     	box.setSolidColor(GLColor.CYAN);
     	box.setPickable(false);
-    	room.attachChild(box);
+    	lNode.attachChild(box);
     	  	
     	box = new Box("westW", 1.0f, 12.0f, 6.0f);
     	box.setLocalTranslation(-6.5f, 0.f, 0.f);
     	box.setSolidColor(GLColor.BLUE);
     	box.setPickable(false);
-    	room.attachChild(box);
+    	lNode.attachChild(box);
     	
     	box = new Box("eastW", 1.0f, 12.0f, 6.0f);
     	box.setLocalTranslation(6.5f, 0.f, 0.f);
     	box.setSolidColor(GLColor.BLUE);
     	box.setPickable(false);
-    	room.attachChild(box);
+    	lNode.attachChild(box);
     	
     	box = new Box("Cpillar1", 1.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(-6.5f, -6.5f, 0.f);
     	box.setPickable(false);
-    	room.attachChild(box);
+    	lNode.attachChild(box);
     	
     	box = new Box("Cpillar2", 1.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(6.5f, -6.5f, 0.f);
     	box.setPickable(false);
-    	room.attachChild(box);
+    	lNode.attachChild(box);
     	
     	box = new Box("Cpillar3", 1.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(6.5f, 6.5f, 0.f);
     	box.setPickable(false);
-    	room.attachChild(box);
+    	lNode.attachChild(box);
     	
     	box = new Box("Cpillar4", 1.0f, 1.0f, 6.0f);
     	box.setLocalTranslation(-6.5f, 6.5f, 0.f);
     	box.setPickable(false);
-    	room.attachChild(box);
+    	lNode.attachChild(box);
     	
     	/*
     	quad = new Quad("floor", 12.0f, 12.0f);
@@ -196,7 +203,7 @@ public class DemoGameThread extends Thread {
     	room.attachChild(quad);
     	*/
     	
-    	board = createBoard();
+    	board = new Board("Board");
     	board.setLocalTranslation(0, 0, -2.9f);
     	
     	InputStream stream1 = mGLView.getContext().getResources().openRawResource(R.raw.pawn);
@@ -207,7 +214,7 @@ public class DemoGameThread extends Thread {
 			mesh.setLocalTranslation(-2.5f, -2.5f, -2.8f);
 			//mesh.setLocalScale(2, 2, 2);
 	    	mesh.setSolidColor(GLColor.ORANGE);
-	    	room.attachChild(mesh);
+	    	lNode.attachChild(mesh);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -241,15 +248,7 @@ public class DemoGameThread extends Thread {
     	});
     	*/
 		
-		Light light = new Light();
-		light.setPosition(new float[]{-1, 1, 1, 0});
-		light.setAmbient(new float[]{0.1f, 0.1f, 0.1f, 1});
-		light.setDiffuse(new float[]{0.8f, 0.8f, 0.8f, 1});
-		light.setSpecular(new float[]{1, 1, 1, 1});
-		LightNode lNode = new LightNode("light", light);
-		
-    	room.attachChild(board);
-    	lNode.attachChild(room);
+    	lNode.attachChild(board);
 		world.attachChild(lNode);
 		world.updateTransform();
 		world.updateWorldBound(false);

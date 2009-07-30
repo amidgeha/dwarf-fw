@@ -10,7 +10,6 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import android.graphics.Canvas.VertexMode;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -289,10 +288,10 @@ public class Object3D {
 						data3f[2] = Float.parseFloat(lineSplit[3]);
 					
 						// normalize... 
-						//invLength =  1/Matrix.length(data3f[0], data3f[1], data3f[2]);
-						//data3f[0] *= invLength;
-						//data3f[1] *= invLength;
-						//data3f[2] *= invLength;
+						invLength =  1/Matrix.length(data3f[0], data3f[1], data3f[2]);
+						data3f[0] *= invLength;
+						data3f[1] *= invLength;
+						data3f[2] *= invLength;
 					
 						tmpNormals[iRawNormals] = data3f[0];
 						tmpNormals[iRawNormals+1] = data3f[1];

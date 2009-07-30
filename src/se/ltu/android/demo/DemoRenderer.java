@@ -1,26 +1,16 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.FloatBuffer;
-
 import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-import javax.microedition.khronos.opengles.GL11;
 
 import se.ltu.android.demo.intersection.Ray;
 import se.ltu.android.demo.scene.Node;
-import se.ltu.android.demo.scene.shapes.*;
-import se.ltu.android.demo.util.BufferUtils;
-import se.ltu.android.demo.util.GLColor;
 import se.ltu.android.demo.util.GLExtras;
 
 import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.os.Debug;
-import android.util.FloatMath;
 import android.util.Log;
 
 /**
@@ -145,31 +135,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     			has_vbos = true;
     			scene.generateHardwareBuffers(gl);
     		}
-        	//Debug.startMethodTracing("Draw scene");
         	scene.draw(gl);
-        	if(pickLine != null) {
-	        	FloatBuffer line = BufferUtils.createFloatBuffer(6);
-	        	line.rewind();
-	        	line.put(pickLine);
-	        	line.rewind();
-	        	gl.glVertexPointer(3, GL10.GL_FLOAT, 0, line);
-	        	FloatBuffer lineColor = BufferUtils.createFloatBuffer(8);
-	        	lineColor.rewind();
-	        	lineColor.put(new float[]{1,1,1,1,1,1,1,1});
-	        	lineColor.rewind();
-	        	gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-	        	gl.glColorPointer(4, GL10.GL_FLOAT, 0, lineColor);
-	        	CharBuffer indices = BufferUtils.createCharBuffer(2);
-	        	indices.rewind();
-	        	indices.put(new char[]{0,1});
-	        	indices.rewind();
-	        	gl.glLineWidth(5.0f);
-	        	gl.glDrawElements(GL10.GL_LINES, 2, GL10.GL_UNSIGNED_SHORT, indices);
-	        	gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-        	}
-        	//Debug.stopMethodTracing();
         }
-        /*
         long now = System.currentTimeMillis();
         if(now - lastFrame >= 1000l) {
             Log.d(TAG, tmp=fps + " fps");
@@ -178,7 +145,6 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         } else {
         	fps++;
         }
-        */
         
         calcTouchRay(gl);
     }
@@ -218,14 +184,9 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 		Matrix.invertM(invModelM, 0, modelM, 0);
 		Matrix.multiplyMV(rayPos, 0, invModelM, 0, rayRawPos, 0);
 		Matrix.multiplyMV(rayDir, 0, invModelM, 0, rayRawDir, 0);
-    	/*float invlen = 1/Matrix.length(rayDir[0], rayDir[1], rayDir[2]);
-    	rayDir[0] *= invlen;
-    	rayDir[1] *= invlen;
-    	rayDir[2] *= invlen;*/
-		Log.d(TAG, tmp="  Raw Ray pos: ("+rayRawPos[0]+", "+rayRawPos[1]+", "+rayRawPos[2]+") - dir: ("+rayRawDir[0]+", "+rayRawDir[1]+", "+rayRawDir[2]+")");
-		Log.d(TAG, tmp="World Ray pos: ("+rayPos[0]+", "+rayPos[1]+", "+rayPos[2]+") - dir: ("+rayDir[0]+", "+rayDir[1]+", "+rayDir[2]+")");
-		pickLine = new float[]{rayPos[0],rayPos[1],rayPos[2],rayPos[0]+20*rayDir[0],rayPos[1]+20*rayDir[1],rayPos[2]+20*rayDir[2]};
-		Log.d(TAG, "Line: ("+pickLine[0]+", "+pickLine[1]+", "+pickLine[2]+") -> ("+pickLine[3]+", "+pickLine[4]+", "+pickLine[5]+")");
+
+		//Log.d(TAG, tmp="  Raw Ray pos: ("+rayRawPos[0]+", "+rayRawPos[1]+", "+rayRawPos[2]+") - dir: ("+rayRawDir[0]+", "+rayRawDir[1]+", "+rayRawDir[2]+")");
+		//Log.d(TAG, tmp="World Ray pos: ("+rayPos[0]+", "+rayPos[1]+", "+rayPos[2]+") - dir: ("+rayDir[0]+", "+rayDir[1]+", "+rayDir[2]+")");
 		synchronized(pickLock) {
 			pickRay = new Ray(rayPos[0], rayPos[1], rayPos[2], rayDir[0], rayDir[1], rayDir[2]);
 		}
