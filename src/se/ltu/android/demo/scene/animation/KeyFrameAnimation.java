@@ -5,7 +5,9 @@ import java.util.ArrayList;
 
 import se.ltu.android.demo.scene.Spatial;
 
+import android.util.FloatMath;
 import android.util.Log;
+import android.view.animation.Interpolator;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -24,6 +26,10 @@ public class KeyFrameAnimation {
 	private boolean isRunning = false;
 	private float[] tmpTrans = new float[3];
 	private boolean isPrepared;
+	private Interpolator interpolator;
+	private float iLFT;
+	private float totalRatio;
+	private long ipTime;
 
 	/**
 	 * Adds a frame to the animation path. If there already
@@ -37,6 +43,8 @@ public class KeyFrameAnimation {
 			// add last instead of checking the whole array
 			frames.add(frame);
 			lastFrameTime = frame.time;
+			// compute inverse here, instead of every update later
+			iLFT = 1.0f/((float)lastFrameTime);
 			return;
 		}
 		for(int i = 0; i < len; i++) {
@@ -123,6 +131,14 @@ public class KeyFrameAnimation {
 	public void update(long tpf, Spatial caller) {
 		if(isRunning) {
 			curTime += tpf;
+			/*
+			ipTime = curTime;
+			if(interpolator != null) {
+				totalRatio = ipTime * iLFT;
+				totalRatio = interpolator.getInterpolation(totalRatio);
+				ipTime = (long) FloatMath.ceil(totalRatio * lastFrameTime);
+			}
+			*/
 			
 			// handle frame change
 			if(curTime > nextFrame.time) {
@@ -133,19 +149,30 @@ public class KeyFrameAnimation {
 				frameChange();
 			}
 			// ratio between frames
-			float ratio = (curTime-curFrame.time)/((float)(nextFrame.time-curFrame.time));
+			float frameRatio = (curTime-curFrame.time)/((float)(nextFrame.time-curFrame.time));
+			if(interpolator != null) {
+				frameRatio = interpolator.getInterpolation(frameRatio);
+			}
 			
 			float[] nextTrans = nextFrame.getTranslation();
 			float[] curTrans = curFrame.getTranslation();
-			tmpTrans[0] = curTrans[0] + (nextTrans[0] - curTrans[0])*ratio;
-			tmpTrans[1] = curTrans[1] + (nextTrans[1] - curTrans[1])*ratio;
-			tmpTrans[2] = curTrans[2] + (nextTrans[2] - curTrans[2])*ratio;
+			tmpTrans[0] = curTrans[0] + (nextTrans[0] - curTrans[0])*frameRatio;
+			tmpTrans[1] = curTrans[1] + (nextTrans[1] - curTrans[1])*frameRatio;
+			tmpTrans[2] = curTrans[2] + (nextTrans[2] - curTrans[2])*frameRatio;
 			synchronized (caller) {
 				caller.setLocalTranslation(tmpTrans);
 				caller.updateTransform();
 				caller.updateWorldBound(false);
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @param ip
+	 */
+	public void setInterpolator(Interpolator ip) {
+		this.interpolator = ip;
 	}
 
 	/**

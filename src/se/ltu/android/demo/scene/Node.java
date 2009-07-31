@@ -167,7 +167,6 @@ public class Node extends Spatial {
 		if(ray.intersects(worldBound)) {
 			int len = children.size();
 			if(pickable) {
-				Log.d("Ray", "picked "+name);
 				for(int i = 0; i < len; i++) {
 					children.get(i).calculatePick(ray, result);
 				}

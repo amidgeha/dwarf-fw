@@ -27,6 +27,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	private static final int CAMERA_1 = 0;
 	private static final int CAMERA_2 = 1;
 	private static final int CAMERA_3 = 2;
+	private static final int CAMERA_4 = 3;
 	
 	// keeps track of current orientation
 	float[] orient = {0.f, 0.f, 0.f};
@@ -111,20 +112,16 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         	GLExtras.gluLookAt(pos[0], pos[1], pos[2], 0, 0, -2.9f, 0, 0, 1, modelM);
         	//Matrix.translateM(modelM, 0, 0, 0, -12);
         }
-        else {
+        else if(cam_mode == CAMERA_3) {
         	pos[0] = 6;
         	pos[1] = 0;
         	pos[2] = 6;
         	GLExtras.gluLookAt(pos[0], pos[1], pos[2], 0, 0, -2.9f, 0, 0, 1, modelM);
-        }
-        gl.glLoadMatrixf(modelM, 0);
-        /*
-        if(cam_mode == CAMERA_LOCKED) {
-        	gl.glLoadMatrixf(modelM, 0);
         } else {
         	mSensorHandler.getRotM4(modelM);
-            //Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2]);
-        }*/
+        	//Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2])
+        }
+        gl.glLoadMatrixf(modelM, 0);
              
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         
@@ -224,6 +221,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 			cam_mode = CAMERA_2;
 		} else if(cam_mode == CAMERA_2) {
 			cam_mode = CAMERA_3;
+		} else if(cam_mode == CAMERA_3) {
+			cam_mode = CAMERA_4;
 		} else {
 			cam_mode = CAMERA_1;
 		}
