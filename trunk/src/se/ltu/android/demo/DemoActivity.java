@@ -38,8 +38,8 @@ public class DemoActivity extends Activity {
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         sensors = new ArrayList<Sensor>();
         //sensors.add((mSensorManager.getSensorList(Sensor.TYPE_ORIENTATION)).get(0));
-        //sensors.add((mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER)).get(0));
-        //sensors.add((mSensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD)).get(0));
+        sensors.add((mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER)).get(0));
+        sensors.add((mSensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD)).get(0));
         mSensorHandler = new SensorHandler();
         //mSensorHandler.start();
         

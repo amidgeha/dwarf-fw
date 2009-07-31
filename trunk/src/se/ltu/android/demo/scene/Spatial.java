@@ -213,7 +213,6 @@ public abstract class Spatial {
 		if(pickable) {
 			float[] distance = new float[1];
 			if(ray.intersects(worldBound, distance)) {
-				Log.d("Ray", "picked "+name);
 				result.add(this, distance[0]);
 			}
 		}
