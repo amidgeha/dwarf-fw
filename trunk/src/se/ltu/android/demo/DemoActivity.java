@@ -21,7 +21,6 @@ public class DemoActivity extends Activity {
 	private DemoGLSurfaceView mGLView;
 	private SensorManager mSensorManager;
 	private ArrayList<Sensor> sensors;
-	private SensorHandler mSensorHandler;
 	private DemoGameThread mGameThread;
 	
     @Override
@@ -40,11 +39,10 @@ public class DemoActivity extends Activity {
         //sensors.add((mSensorManager.getSensorList(Sensor.TYPE_ORIENTATION)).get(0));
         sensors.add((mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER)).get(0));
         sensors.add((mSensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD)).get(0));
-        mSensorHandler = new SensorHandler();
         //mSensorHandler.start();
         
         // set opengl view
-        mGLView = new DemoGLSurfaceView(this, mSensorHandler);
+        mGLView = new DemoGLSurfaceView(this);
         setContentView(mGLView);
         mGLView.requestFocus();
         mGLView.setFocusableInTouchMode(true);

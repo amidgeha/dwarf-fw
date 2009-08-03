@@ -3,10 +3,6 @@ package se.ltu.android.demo;
 
 import se.ltu.android.demo.filter.MPMovingAverageFilter;
 import android.hardware.SensorManager;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
 
 /**
  * A class that will handle sensor data in a separate thread. All kinds of
@@ -16,42 +12,21 @@ import android.util.Log;
  * @version $Revision$
  * @lastmodified $Date$
  */
-public class SensorHandler extends Thread {
+public abstract class SensorHandler {
+	private static final String TAG = "SensorHandler";
 	private static final float ACC_BUFFER_OFFSET = 1.0f;
 	private static final float MAG_BUFFER_OFFSET = 5.0f;
-
-	private final String TAG = "SensorHandler";
-	private float[] acc_raw = { 0.0f, 0.0f, 0.0f };
-	private float[] mag_raw = { 0.0f, 0.0f, 0.0f };
-	private float[] ori_raw = { 0.0f, 0.0f, 0.0f };
-	private float[] accBuffer = { 0.0f, 0.0f, 0.0f };
-	private float[] magBuffer = { 0.0f, 0.0f, 0.0f };
-	private Object oriLock = new Object();
-	private Object accLock = new Object();
-	private Object magLock = new Object();
-	private MPMovingAverageFilter accFilter;
-	private MPMovingAverageFilter magFilter;
-
-	public Handler mHandler;
-
-	public SensorHandler() {
-		accFilter = new MPMovingAverageFilter(25, 3, 3);
-		accFilter.initialize();
-		magFilter = new MPMovingAverageFilter(25, 3, 3);
-		magFilter.initialize();
-	}
-
-	public void run() {
-		Looper.prepare();
-
-		mHandler = new Handler() {
-			public void handleMessage(Message msg) {
-				// Log.d(TAG, "Got message: "+msg.what);
-			}
-		};
-
-		Looper.loop();
-	}
+	
+	private static float[] acc_raw = { 0.0f, 0.0f, 0.0f };
+	private static float[] mag_raw = { 0.0f, 0.0f, 0.0f };
+	private static float[] ori_raw = { 0.0f, 0.0f, 0.0f };
+	private static float[] accBuffer = { 0.0f, 0.0f, 0.0f };
+	private static float[] magBuffer = { 0.0f, 0.0f, 0.0f };
+	private static Object oriLock = new Object();
+	private static Object accLock = new Object();
+	private static Object magLock = new Object();
+	private static MPMovingAverageFilter accFilter = new MPMovingAverageFilter(25, 3, 3);
+	private static MPMovingAverageFilter magFilter = new MPMovingAverageFilter(25, 3, 3);
 
 	/**
 	 * @param timestamp
@@ -59,7 +34,7 @@ public class SensorHandler extends Thread {
 	 * @param data
 	 *            array of values with length 3
 	 */
-	public void handleAccData(long timestamp, float[] data) {
+	public static void handleAccData(long timestamp, float[] data) {
 		acc_raw[0] = data[0];
 		acc_raw[1] = data[1];
 		acc_raw[2] = data[2];
@@ -86,7 +61,7 @@ public class SensorHandler extends Thread {
 	 * @param data
 	 *            array of values with length 3
 	 */
-	public void handleMagData(long timestamp, float[] data) {
+	public static void handleMagData(long timestamp, float[] data) {
 		mag_raw[0] = data[0];
 		mag_raw[1] = data[1];
 		mag_raw[2] = data[2];
@@ -113,7 +88,7 @@ public class SensorHandler extends Thread {
 	 * @param data
 	 *            array of values with length 3
 	 */
-	public void handleOriData(long timestamp, float[] data) {
+	public static void handleOriData(long timestamp, float[] data) {
 		synchronized (oriLock) {
 			ori_raw[0] = data[0];
 			ori_raw[1] = data[1];
@@ -127,7 +102,7 @@ public class SensorHandler extends Thread {
 	 * @param result
 	 *            will contain the orientation after the call
 	 */
-	public void getOri(float[] result) {
+	public static void getOri(float[] result) {
 		synchronized (oriLock) {
 			result[0] = ori_raw[0];
 			result[1] = ori_raw[1];
@@ -142,7 +117,7 @@ public class SensorHandler extends Thread {
 	 *            the matrix as float array with length 16
 	 * @return true if the result was calculated and the result array was set
 	 */
-	public boolean getRotM4(float[] result) {
+	public static boolean getRotM4(float[] result) {
 		float[] acc_res = new float[3];
 		float[] mag_res = new float[3];
 		synchronized (magLock) {
