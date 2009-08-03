@@ -4,13 +4,9 @@ package se.ltu.android.demo;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.opengles.GL10;
 
-import se.ltu.android.demo.intersection.Ray;
+import se.ltu.android.demo.camera.Camera;
 import se.ltu.android.demo.scene.Node;
-import se.ltu.android.demo.util.GLExtras;
 
-import android.opengl.GLU;
-import android.opengl.Matrix;
-import android.os.Debug;
 import android.util.Log;
 
 /**
@@ -19,41 +15,23 @@ import android.util.Log;
  * @lastmodified $Date$
  */
 public class DemoRenderer implements GLSurfaceView.Renderer {
+	private final static String TAG = "RENDERER";
 	private Node scene;	
 	private final float FOVY = 60.0f;
 	private final float ZNEAR = 1.0f;
 	private final float ZFAR = 20.0f;
-	private final static String TAG = "RENDERER";
-	private static final int CAMERA_1 = 0;
-	private static final int CAMERA_2 = 1;
-	private static final int CAMERA_3 = 2;
-	private static final int CAMERA_4 = 3;
+	//private Camera cam;
 	
-	// keeps track of current orientation
-	float[] orient = {0.f, 0.f, 0.f};
-	float[] pos = {5.0f, -5.0f, 0.0f};
 	long lastFrame = 0;
 	int fps = 0;
-	//private float[] projM = new float[16];
-	private float[] modelM = new float[16];
-	private SensorHandler mSensorHandler;
-	private String tmp;
-	private int width;
-	private int height;
-	private float aspect;
-
-	private float pickX = -1;
-	private float pickY = -1;
-	private Ray pickRay;
-	private int cam_mode = CAMERA_1;
 	private boolean use_vbos = false;
 	private boolean has_vbos = false;
-	private Object pickLock = new Object();
-	private float[] pickLine;
+	//private Object pickLock = new Object();
+	private Camera camera;
 	
-	public DemoRenderer(SensorHandler handler) {
-		mSensorHandler = handler;
+	public DemoRenderer() {
 		lastFrame = System.currentTimeMillis();
+		camera = new Camera();	// need a default one if one is not set for us
 	}
 
 	public void surfaceCreated(GL10 gl) {
@@ -74,17 +52,11 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         gl.glShadeModel(GL10.GL_SMOOTH);
     }
 
-    public void sizeChanged(GL10 gl, int w, int h) {
-    	width = w;
-    	height = h;
-    	aspect = (float) w / h;
-    	
-    	gl.glViewport(0, 0, width, height);
-        gl.glMatrixMode(GL10.GL_PROJECTION);     
-        gl.glLoadIdentity();
-        GLU.gluPerspective(gl, FOVY, aspect, ZNEAR, ZFAR);
-        //GLExtras.gluPerspective(FOVY, aspect, ZNEAR, ZFAR, projM);
-        //gl.glLoadMatrixf(projM, 0);
+    public void sizeChanged(GL10 gl, int w, int h) {   	
+    	gl.glViewport(0, 0, w, h);
+    	Camera.setPerspective(FOVY, w, h, ZNEAR, ZFAR);
+        gl.glMatrixMode(GL10.GL_PROJECTION); 
+        gl.glLoadMatrixf(Camera.getProjectionM(), 0);
     }
     
     public void shutdown(GL10 gl) {
@@ -98,31 +70,9 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         
         // setup camera
         gl.glMatrixMode(GL10.GL_MODELVIEW);
-        Matrix.setIdentityM(modelM, 0);
-        if(cam_mode == CAMERA_1) {
-        	pos[0] = 0;
-        	pos[1] = 0;
-        	pos[2] = 9;
-        	Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2]);
+        synchronized(camera) {
+        	gl.glLoadMatrixf(camera.getModelM(), 0);
         }
-        else if(cam_mode == CAMERA_2) {
-        	pos[0] = 5;
-        	pos[1] = -5;
-        	pos[2] = 3;
-        	GLExtras.gluLookAt(pos[0], pos[1], pos[2], 0, 0, -2.9f, 0, 0, 1, modelM);
-        	//Matrix.translateM(modelM, 0, 0, 0, -12);
-        }
-        else if(cam_mode == CAMERA_3) {
-        	pos[0] = 6;
-        	pos[1] = 0;
-        	pos[2] = 6;
-        	GLExtras.gluLookAt(pos[0], pos[1], pos[2], 0, 0, -2.9f, 0, 0, 1, modelM);
-        } else {
-        	mSensorHandler.getRotM4(modelM);
-        	//Matrix.translateM(modelM, 0, -pos[0], -pos[1], -pos[2])
-        }
-        gl.glLoadMatrixf(modelM, 0);
-             
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         
         // draw the world
@@ -136,96 +86,16 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         }
         long now = System.currentTimeMillis();
         if(now - lastFrame >= 1000l) {
-            Log.d(TAG, tmp=fps + " fps");
+            Log.d(TAG, fps + " fps");
             fps = 0;
             lastFrame = now;
         } else {
         	fps++;
         }
-        
-        calcTouchRay(gl);
     }
-
-	/**
-	 * Converts screen coordinates to coordinates on the near plane.
-	 * Then a picking ray is defined as the line starting at the eye position
-	 * and going towards the coordinate at the near plane.
-	 */
-    private void calcTouchRay(GL10 gl) {
-    	// check for a possible value, else return
-    	if(pickX == -1) {
-    		return;
-    	}
-		
-    	// coordinates centered on the screen 
-    	float centered_y = (height - pickY) - height/2;
-    	float centered_x = pickX - width/2;
-    	// unit coordinates (-1.0f to 1.0f)
-    	float unit_x = centered_x/(width/2);
-    	float unit_y = centered_y/(height/2);
-    	
-    	//Log.d(TAG, "Pick: ("+pickX+", "+pickY+") - Unit: ("+unit_x+", "+unit_y+")");
-    	
-		float angle = FOVY * GLExtras.DEG_TO_RAD / 2.0f;
-		// defined as glFrustrumf(), that is, half the height.
-		float near_height = (float)(ZNEAR * Math.tan(angle)); // FloatMath.sin(angle)/FloatMath.cos(angle);
-		
-		float[] rayRawPos = {0.0f, 0.0f, 0.0f, 1.0f};
-		float[] rayRawDir = {unit_x * near_height * aspect, unit_y * near_height, -ZNEAR, 0.0f};
-		float[] rayPos = new float[4];
-		float[] rayDir = new float[4];
-		
-		// multiply the position and vector with the inverse model matrix
-		// to get world coordinates
-		float[] invModelM = new float[16];
-		Matrix.invertM(invModelM, 0, modelM, 0);
-		Matrix.multiplyMV(rayPos, 0, invModelM, 0, rayRawPos, 0);
-		Matrix.multiplyMV(rayDir, 0, invModelM, 0, rayRawDir, 0);
-
-		//Log.d(TAG, tmp="  Raw Ray pos: ("+rayRawPos[0]+", "+rayRawPos[1]+", "+rayRawPos[2]+") - dir: ("+rayRawDir[0]+", "+rayRawDir[1]+", "+rayRawDir[2]+")");
-		//Log.d(TAG, tmp="World Ray pos: ("+rayPos[0]+", "+rayPos[1]+", "+rayPos[2]+") - dir: ("+rayDir[0]+", "+rayDir[1]+", "+rayDir[2]+")");
-		synchronized(pickLock) {
-			pickRay = new Ray(rayPos[0], rayPos[1], rayPos[2], rayDir[0], rayDir[1], rayDir[2]);
-		}
-		//Log.d(TAG, tmp="Ray pos: "+pickRayPos[0]+", "+pickRayPos[1]+", "+pickRayPos[2]+
-		//		" - dir:"+pickRayDir[0]+", "+pickRayDir[1]+", "+pickRayDir[2]);
-		
-		// set to an impossible value
-		pickX = -1;
-	}
-
-	public void pick(float x, float y) {
-		// set input variables and we will handle them in calcTouchRay
-		pickX = x;
-		pickY = y;
-	}
 
 	public void setScene(Node scene) {
 		this.scene = scene;
-	}
-
-	// TODO this is really bad... do all rays in thread instead.
-	public Ray getPickRay() {
-		synchronized(pickLock) {
-			Ray retRay = pickRay;
-			pickRay = null;
-			return retRay;
-		}
-	}
-
-	/**
-	 * 
-	 */
-	public void changeCamera() {
-		if(cam_mode == CAMERA_1) {
-			cam_mode = CAMERA_2;
-		} else if(cam_mode == CAMERA_2) {
-			cam_mode = CAMERA_3;
-		} else if(cam_mode == CAMERA_3) {
-			cam_mode = CAMERA_4;
-		} else {
-			cam_mode = CAMERA_1;
-		}
 	}
 	
 	public void useVBOs(boolean value) {
@@ -246,5 +116,14 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
                 EGL10.EGL_NONE
         };
         return configSpec;
+	}
+
+	/**
+	 * @param camera
+	 */
+	public void setCamera(Camera camera) {
+		synchronized(camera) {
+			this.camera = camera;
+		}
 	}
 }

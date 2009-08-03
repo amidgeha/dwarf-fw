@@ -7,6 +7,7 @@ import java.io.InputStream;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import se.ltu.android.demo.camera.Camera;
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.intersection.PickResult;
 import se.ltu.android.demo.intersection.Ray;
@@ -21,7 +22,6 @@ import se.ltu.android.demo.scene.animation.KeyFrame;
 import se.ltu.android.demo.scene.animation.KeyFrameAnimation;
 import se.ltu.android.demo.scene.shapes.*;
 import se.ltu.android.demo.util.GLColor;
-import se.ltu.android.demo.util.GLExtras;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -33,22 +33,52 @@ public class DemoGameThread extends Thread {
 	private final static int TARGET_FPS = 30;
 	public static long timePerFrame = 1000;
 	private long timeTarget;
-	private long timeLast = 0;
 	private Node world;
 	private DemoGLSurfaceView mGLView;
 	private boolean isRunning = true;
 	private boolean isPaused = false;
 	private Spatial pickedMesh;
 	private Box box;
+	private Camera[] camList;	// camera list
+	private int iCam = 0;		// camera pointer
+	/**
+	 * [0] = x coordinate (-1 = no tap registered)<br>
+	 * [1] = y coordinate<br>
+	 */
+	private static float[] tapCoords = new float[2];
+	/**
+	 * [0] = x coordinate<br>
+	 * [1] = y coordinate<br>
+	 * [2] = coordinate change (0 = false, true otherwise)<br>
+	 * [3] = on click (0 = false, true otherwise)<br>
+	 */
+	private static float[] trackInput = new float[4];
+	private float[] modelM = new float[16];
+	private int iCamSensor = 0;
 
 	public DemoGameThread(DemoGLSurfaceView glview) {
 		mGLView = glview;
 		timeTarget = 1000/TARGET_FPS;
+		camList = new Camera[4];
+		
+		camList[0] = new Camera();
+		camList[0].setIdentity();
+		camList[0].setPosition(0, 0, 9);
+		
+		camList[1] = new Camera();
+		camList[1].lookAt(5, -5, 3, 0, 0, -2.9f, 0, 0, 1);
+		
+		camList[2] = new Camera();
+		camList[2].lookAt(6, 0, 6, 0, 0, -2.9f, 0, 0, 1);
+		
+		camList[3] = new Camera();	// used for rotation
+		iCamSensor  = 3;
 	}
 	
 	public void run() {
 		mGLView.getRenderer().useVBOs(true);
 		createWorld();
+		mGLView.getRenderer().setCamera(camList[iCam]);
 		mGLView.getRenderer().setScene(world);
 		
 		long lastTime = System.currentTimeMillis();
@@ -81,14 +111,46 @@ public class DemoGameThread extends Thread {
 	    updateInput();
 	    //updateAI();
 	    //updatePhysics();
-	    //updateAnimations();
-	    world.update(timePerFrame);
+	    world.update(timePerFrame);		// updates animations
+	    updateCamera();
 	    //updateSound();
 		//mGLView.requestRender();
 	}
-	
+
+	private void updateCamera() {
+		if(iCam == iCamSensor) {
+			SensorHandler.getRotM4(modelM);
+			camList[iCam].setRotationM(modelM);
+		}
+		mGLView.getRenderer().setCamera(camList[iCam]);
+	}
+
 	private void updateInput() {
-		Ray pickRay = mGLView.getRenderer().getPickRay();
+		checkPick();
+		checkTrack();
+	}
+
+	private void checkTrack() {
+		synchronized(trackInput) {
+			if(trackInput[3] != 0) {
+				// switch camera
+				iCam++;
+				if(iCam == camList.length) {
+					iCam = 0;
+				}
+			}
+			trackInput[3] = 0;
+		}
+	}
+
+	private void checkPick() {
+		Ray pickRay = null; // = mGLView.getRenderer().getPickRay();
+		synchronized(tapCoords) {
+			if(tapCoords[0] != -1) {
+				pickRay = camList[iCam].calculatePickRay(tapCoords[0], tapCoords[1]);
+			}
+			tapCoords[0] = -1;
+		}
 		if(pickRay != null) {
 			PickResult result = new PickResult();
 			world.calculatePick(pickRay, result);
@@ -137,6 +199,24 @@ public class DemoGameThread extends Thread {
 	
 	public void onResume() {
 		isPaused = false;
+	}
+	
+	/**
+	 * Register a tap on this thread
+	 * @param x screen x coordinate
+	 * @param y screen y coordinate
+	 */
+	public static void onTap(float x, float y) {
+		synchronized(tapCoords) {
+			tapCoords[0] = x;
+			tapCoords[1] = y;
+		}
+	}
+	
+	public static void onTrackballClick() {
+		synchronized(trackInput) {
+			trackInput[3] = 1;
+		}
 	}
 
 	private void createWorld() {
@@ -208,8 +288,8 @@ public class DemoGameThread extends Thread {
     	board = new Board("Board");
     	board.setLocalTranslation(0, 0, -2.9f);
     	
-    	InputStream stream1 = mGLView.getContext().getResources().openRawResource(R.raw.pawn);
-    	InputStream stream2 = mGLView.getContext().getResources().openRawResource(R.raw.pawn);
+    	InputStream stream1 = mGLView.getContext().getResources().openRawResource(R.raw.knight);
+    	InputStream stream2 = mGLView.getContext().getResources().openRawResource(R.raw.knight);
     	
     	try {
 			mesh = new Object3D().loadModel("piece", stream1, stream2);
@@ -256,36 +336,5 @@ public class DemoGameThread extends Thread {
 		world.updateWorldBound(false);
 		
 		//board.getChildren()
-	}
-
-	/**
-	 * @return
-	 */
-	private Node createBoard() {
-		Node board = new Node("Board");
-		Box darkSquare = new Box("darkSquare", 1.0f, 1.0f, 0.2f);
-		Box lightSquare = new Box("lightSquare", 1.0f, 1.0f, 0.2f);
-		darkSquare.setSolidColor(new float[]{0.4f,0.2f,0.08f,1.0f});
-		lightSquare.setSolidColor(new float[]{0.87f,0.62f,0.45f,1.0f});
-		
-		TriMesh curSquare = null;
-		short oddeven = 1; // 1a (a dark square) starts as odd
-		String name;
-		// create chess board from 1a to 8h
-		for(short row = 1; row < 9; row++) {
-			for(short col = 0; col < 8; col++) {
-				name = String.valueOf((char)('a'+col)) + row;
-				if((oddeven & 1) == 0) {
-					curSquare = lightSquare.cloneMesh(name);
-				} else {
-					curSquare = darkSquare.cloneMesh(name);
-				}
-				curSquare.setLocalTranslation(col-3.5f, row-4.5f, 0.0f);
-				board.attachChild(curSquare);
-				oddeven++;
-			}
-			oddeven++;
-		}
-		return board;
 	}
 }
