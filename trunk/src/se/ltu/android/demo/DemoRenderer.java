@@ -20,13 +20,10 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	private final float FOVY = 60.0f;
 	private final float ZNEAR = 1.0f;
 	private final float ZFAR = 20.0f;
-	//private Camera cam;
 	
 	long lastFrame = 0;
 	int fps = 0;
 	private boolean use_vbos = false;
-	private boolean has_vbos = false;
-	//private Object pickLock = new Object();
 	private Camera camera;
 	
 	public DemoRenderer() {
@@ -50,6 +47,15 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         gl.glEnable(GL10.GL_COLOR_MATERIAL);
         gl.glDepthFunc(GL10.GL_LEQUAL);
         gl.glShadeModel(GL10.GL_SMOOTH);
+        
+        if(scene != null) {
+        	if(use_vbos) {
+    			// FIXME messy...
+    			scene.forgetHardwareBuffers();
+    			scene.generateHardwareBuffers(gl);
+    		}
+        }
+        
     }
 
     public void sizeChanged(GL10 gl, int w, int h) {   	
@@ -60,8 +66,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     }
     
     public void shutdown(GL10 gl) {
-		if (use_vbos) {
-			//scene.freeHardwareBuffers(gl);
+		if (scene != null && use_vbos) {
+			scene.freeHardwareBuffers(gl);
         }
     }
 
@@ -77,9 +83,9 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         
         // draw the world
         if(scene != null) {
-        	if(use_vbos && !has_vbos) {
-    			// FIXME messy...
-    			has_vbos = true;
+        	if(use_vbos) {
+        		// creates hardware buffers for objects
+        		// that do not already have any
     			scene.generateHardwareBuffers(gl);
     		}
         	scene.draw(gl);

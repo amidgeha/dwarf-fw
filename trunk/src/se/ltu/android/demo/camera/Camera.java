@@ -251,6 +251,10 @@ public class Camera {
 		}
 	}
 	
+	public float[] getPosition() {
+		return position;
+	}
+	
 	/**
 	 * Set the cameras model view matrix to the identity matrix
 	 */

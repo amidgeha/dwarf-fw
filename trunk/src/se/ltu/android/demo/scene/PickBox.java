@@ -22,7 +22,7 @@ public class PickBox extends Spatial {
 	}
 
 	/**
-	 * This method does nothing on this object
+	 * Empty implementation. Does nothing on a PickBox.
 	 * @see se.ltu.android.demo.scene.Spatial#draw(javax.microedition.khronos.opengles.GL10)
 	 */
 	@Override
@@ -30,15 +30,22 @@ public class PickBox extends Spatial {
 	}
 
 	/**
-	 * This method does nothing on this object
+	 * Empty implementation. Does nothing on a PickBox.
 	 * @see se.ltu.android.demo.scene.Spatial#freeHardwareBuffers(javax.microedition.khronos.opengles.GL10)
 	 */
 	@Override
 	public void freeHardwareBuffers(GL10 gl) {
 	}
+	
+	/* (non-Javadoc)
+	 * @see se.ltu.android.demo.scene.Spatial#forgetHardwareBuffers()
+	 */
+	@Override
+	public void forgetHardwareBuffers() {
+	}
 
 	/**
-	 * This method does nothing on this object
+	 * Empty implementation. Does nothing on a PickBox.
 	 * @see se.ltu.android.demo.scene.Spatial#generateHardwareBuffers(javax.microedition.khronos.opengles.GL10)
 	 */
 	@Override
@@ -54,18 +61,14 @@ public class PickBox extends Spatial {
 	}
 
 	/**
-	 * This method does nothing on this object. Use setModelBound() if
-	 * you want to change the model bound.
+	 * Empty implementation. Does nothing on a PickBox. Use <code>setModelBound()</code>
+	 * if you want to change the model bound.
 	 * @see se.ltu.android.demo.scene.Spatial#updateModelBound()
 	 */
 	@Override
 	public void updateModelBound() {
 	}
 
-	/**
-	 * Updates
-	 * @see se.ltu.android.demo.scene.Spatial#updateWorldBound(boolean)
-	 */
 	@Override
 	public void updateWorldBound(boolean propagate) {
 		worldBound.transform(transM, modelBound);
@@ -73,5 +76,4 @@ public class PickBox extends Spatial {
 			parent.updateWorldBound(this);
 		}
 	}
-
 }
