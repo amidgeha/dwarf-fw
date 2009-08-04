@@ -84,7 +84,7 @@ public abstract class Spatial {
 	}
 	
 	public void setLocalTranslation(float[] translation) {
-		if(translation != null) {
+		if(translation != null && translation.length == 3) {
 			if(locTranslation == null) {
 				locTranslation = new float[3];
 			}
@@ -105,7 +105,7 @@ public abstract class Spatial {
 	}
 	
 	public void setLocalRotation(float[] rotation) {
-		if(rotation != null) {
+		if(rotation != null && rotation.length == 4) {
 			if(locRotation == null) {
 				locRotation = new float[4];
 			}
@@ -116,7 +116,7 @@ public abstract class Spatial {
 	}
 	
 	public void setLocalScale(float[] scale) {
-		if(scale != null) {
+		if(scale != null && scale.length == 3) {
 			if(locScale == null) {
 				locScale = new float[3];
 			}
@@ -136,7 +136,7 @@ public abstract class Spatial {
 	}
 	
 	public void setTransform(float[] transM) {
-		if(transM.length != 16) {
+		if(transM == null || transM.length != 16) {
 			return;
 		}
 		for(int i = 0; i < 16; i++) {
@@ -251,14 +251,43 @@ public abstract class Spatial {
 		return name;
 	}
 
+	/**
+     * Deletes the hardware buffers allocated by this object (if any).
+     */
 	public abstract void freeHardwareBuffers(GL10 gl);
 
+	/** 
+     * When the OpenGL ES device is lost, GL handles become invalidated.
+     * In that case, we just want to "forget" the old handles (without
+     * explicitly deleting them) and make new ones.
+     */
+	public abstract void forgetHardwareBuffers();
+
+	/** 
+     * Allocates hardware buffers on the graphics card and fills them with
+     * data if a buffer has not already been previously allocated.  Note that
+     * this function uses the GL_OES_vertex_buffer_object extension, which is
+     * not guaranteed to be supported on every device.
+     * @param gl  A pointer to the OpenGL ES context.
+     */
 	public abstract void generateHardwareBuffers(GL10 gl);
 	
+	/**
+	 * Set if this object should be tested for intersections with a
+	 * pick ray and end up in a PickResult.<br>
+	 * <br>
+	 * Default is true.
+	 * @param pickable true if this object should be pickable
+	 */
 	public void setPickable(boolean pickable) {
 		this.pickable = pickable;
 	}
 	
+	/**
+	 * Tells whether or not this object is tested for intersections with
+	 * a pick ray.
+	 * @return true if this object is pickable
+	 */
 	public boolean isPickable() {
 		return pickable;
 	}

@@ -57,6 +57,7 @@ public class DemoGameThread extends Thread {
 	private int iCamSensor = 0;
 
 	public DemoGameThread(DemoGLSurfaceView glview) {
+		setName("GameThread");
 		mGLView = glview;
 		timeTarget = 1000/TARGET_FPS;
 		camList = new Camera[4];

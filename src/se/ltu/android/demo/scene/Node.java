@@ -174,6 +174,7 @@ public class Node extends Spatial {
 		}
 	}
 	
+	@Override
 	public void update(long tpf) {
 		super.update(tpf);
 		int len = children.size();
@@ -182,19 +183,24 @@ public class Node extends Spatial {
 		}
 	}
 
-	/**
-	 * @param gl
-	 */
+	@Override
 	public void freeHardwareBuffers(GL10 gl) {
 		int len = children.size();
 		for (int i = 0; i < len; i++) {
 			children.get(i).freeHardwareBuffers(gl);
 		}
 	}
+	
 
-	/**
-	 * @param gl
-	 */
+	@Override
+	public void forgetHardwareBuffers() {
+		int len = children.size();
+		for (int i = 0; i < len; i++) {
+			children.get(i).forgetHardwareBuffers();
+		}
+	}
+
+	@Override
 	public void generateHardwareBuffers(GL10 gl) {
 		int len = children.size();
 		for (int i = 0; i < len; i++) {

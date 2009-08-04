@@ -435,11 +435,7 @@ public class TriMesh extends Spatial {
 		}
 	}
 	
-	/** 
-     * When the OpenGL ES device is lost, GL handles become invalidated.
-     * In that case, we just want to "forget" the old handles (without
-     * explicitly deleting them) and make new ones.
-     */
+	@Override
     public void forgetHardwareBuffers() {
         mVertBufferIndex = 0;
         mIndexBufferIndex = 0;
@@ -448,9 +444,7 @@ public class TriMesh extends Spatial {
         mColorBufferIndex = 0;
     }
     
-    /**
-     * Deletes the hardware buffers allocated by this object (if any).
-     */
+    @Override
     public void freeHardwareBuffers(GL10 gl) {
         if (mVertBufferIndex != 0) {
             if (gl instanceof GL11) {
@@ -479,14 +473,7 @@ public class TriMesh extends Spatial {
         }
     }
     
-    /** 
-     * Allocates hardware buffers on the graphics card and fills them with
-     * data if a buffer has not already been previously allocated.  Note that
-     * this function uses the GL_OES_vertex_buffer_object extension, which is
-     * not guaranteed to be supported on every device.
-     * @param gl  A pointer to the OpenGL ES context.
-     */
-    
+    @Override    
     public void generateHardwareBuffers(GL10 gl) {
         if (mVertBufferIndex == 0) {
             if (gl instanceof GL11) {
@@ -550,6 +537,7 @@ public class TriMesh extends Spatial {
                 mIndexCount = indices.limit();
                 
                 // TODO are we safe so delete the java.nio.buffers now??
+                // Probably not... since we can lose context every now and then.
             }
         }
     }
