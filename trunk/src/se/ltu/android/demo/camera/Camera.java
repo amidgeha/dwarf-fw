@@ -11,8 +11,6 @@ import android.opengl.Matrix;
  */
 public class Camera {
 	public static final float DEG_TO_RAD = 0.01745329238474369f;
-
-	private static final String TAG = "Camera";
 	
 	// Projection matrix.. keep static so all instances of camera
 	// share the same projection

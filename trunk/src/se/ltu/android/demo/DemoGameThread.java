@@ -3,8 +3,6 @@ package se.ltu.android.demo;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Observable;
-import java.util.Observer;
 
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -14,7 +12,7 @@ import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.intersection.PickResult;
 import se.ltu.android.demo.intersection.Ray;
 import se.ltu.android.demo.light.Light;
-import se.ltu.android.demo.model.Object3D;
+import se.ltu.android.demo.model.ObjLoader;
 import se.ltu.android.demo.scene.Board;
 import se.ltu.android.demo.scene.CameraNode;
 import se.ltu.android.demo.scene.LightNode;
@@ -36,7 +34,6 @@ import se.ltu.android.demo.util.GLColor;
 public class DemoGameThread extends Thread implements AnimationListener {
 	private final static String TAG = "GameThread";
 	private final static int TARGET_FPS = 60;
-	private final static float TRACKBALL_MOVE_MULTIPLIER = 1f;
 	public static long timePerFrame = 1000;
 	private long timeTarget;
 	private Node world;
@@ -316,7 +313,6 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		TriMesh mesh;
 		Board board;
 		Quad quad;
-		Box box;
 
 		Light light = new Light();
 		light.setPosition(new float[] { -1, 1, 1, 0 });
@@ -378,7 +374,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 				.openRawResource(R.raw.knight);
 
 		try {
-			mesh = new Object3D().loadModel("piece", stream1, stream2);
+			mesh = new ObjLoader().loadModel("piece", stream1, stream2);
 			mesh.setLocalTranslation(PieceData.getColPos('b'), PieceData
 					.getRowPos(2), -2.8f);
 			mesh.setSolidColor(GLColor.ORANGE);

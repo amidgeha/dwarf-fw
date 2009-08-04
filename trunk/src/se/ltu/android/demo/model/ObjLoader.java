@@ -28,12 +28,10 @@ import se.ltu.android.demo.util.BufferUtils;
  * @lastmodified $Date$
  */
 /*
- * This one is pretty dumb. To increase rendering performance, consider
- * something like http://www.cs.sunysb.edu/~stripe/
- * 
+ * The implementation is large and memory consuming. The end result is nice though.
  * To reduce loading time, consider saving your Java object to a binary format.
  */
-public class Object3D {
+public class ObjLoader {
 	private final static String TAG = "ObjLoader";
 
 	// the result will end up in these buffers

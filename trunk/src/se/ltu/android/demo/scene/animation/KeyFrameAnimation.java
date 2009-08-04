@@ -2,11 +2,9 @@
 package se.ltu.android.demo.scene.animation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import se.ltu.android.demo.scene.Spatial;
 
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.animation.Interpolator;
 
@@ -16,7 +14,6 @@ import android.view.animation.Interpolator;
  * @lastmodified $Date$
  */
 public class KeyFrameAnimation {
-	private final static String TAG = "KeyFrameAnimation";
 	private ArrayList<KeyFrame> frames = new ArrayList<KeyFrame>();
 	private long curTime;
 	private int curIndex;
@@ -28,9 +25,6 @@ public class KeyFrameAnimation {
 	private float[] tmpTrans = new float[3];
 	private boolean isPrepared;
 	private Interpolator interpolator;
-	private float iLFT;
-	private float totalRatio;
-	private long ipTime;
 	private AnimationListener listener;
 	
 	/**
@@ -72,8 +66,6 @@ public class KeyFrameAnimation {
 			// add last instead of checking the whole array
 			frames.add(frame);
 			lastFrameTime = frame.time;
-			// compute inverse here, instead of every update later
-			iLFT = 1.0f / ((float) lastFrameTime);
 			return;
 		}
 		for (int i = 0; i < len; i++) {
@@ -163,11 +155,6 @@ public class KeyFrameAnimation {
 	public void update(long tpf, Spatial caller) {
 		if (isRunning) {
 			curTime += tpf;
-			/*
-			 * ipTime = curTime; if(interpolator != null) { totalRatio = ipTime
-			 * * iLFT; totalRatio = interpolator.getInterpolation(totalRatio);
-			 * ipTime = (long) FloatMath.ceil(totalRatio * lastFrameTime); }
-			 */
 
 			// handle frame change
 			if (curTime > nextFrame.time) {

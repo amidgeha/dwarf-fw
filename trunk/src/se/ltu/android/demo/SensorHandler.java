@@ -13,16 +13,13 @@ import android.hardware.SensorManager;
  * @lastmodified $Date$
  */
 public abstract class SensorHandler {
-	private static final String TAG = "SensorHandler";
 	private static final float ACC_BUFFER_OFFSET = 1.0f;
 	private static final float MAG_BUFFER_OFFSET = 5.0f;
 	
 	private static float[] acc_raw = { 0.0f, 0.0f, 0.0f };
 	private static float[] mag_raw = { 0.0f, 0.0f, 0.0f };
-	private static float[] ori_raw = { 0.0f, 0.0f, 0.0f };
 	private static float[] accBuffer = { 0.0f, 0.0f, 0.0f };
 	private static float[] magBuffer = { 0.0f, 0.0f, 0.0f };
-	private static Object oriLock = new Object();
 	private static Object accLock = new Object();
 	private static Object magLock = new Object();
 	private static MPMovingAverageFilter accFilter = new MPMovingAverageFilter(25, 3, 3);
@@ -79,34 +76,6 @@ public abstract class SensorHandler {
 
 		synchronized (magLock) {
 			magFilter.addSamples(magBuffer, timestamp);
-		}
-	}
-
-	/**
-	 * @param timestamp
-	 *            time in nanoseconds for event
-	 * @param data
-	 *            array of values with length 3
-	 */
-	public static void handleOriData(long timestamp, float[] data) {
-		synchronized (oriLock) {
-			ori_raw[0] = data[0];
-			ori_raw[1] = data[1];
-			ori_raw[2] = data[2];
-		}
-	}
-
-	/**
-	 * Get the orientation
-	 * 
-	 * @param result
-	 *            will contain the orientation after the call
-	 */
-	public static void getOri(float[] result) {
-		synchronized (oriLock) {
-			result[0] = ori_raw[0];
-			result[1] = ori_raw[1];
-			result[2] = ori_raw[2];
 		}
 	}
 

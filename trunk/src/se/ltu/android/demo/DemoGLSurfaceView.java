@@ -5,10 +5,8 @@ import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.GestureDetector.SimpleOnGestureListener;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -16,11 +14,8 @@ import android.view.GestureDetector.SimpleOnGestureListener;
  * @lastmodified $Date$
  */
 class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
-	private final static String TAG = "DemoGLSurfaceView";
 	private DemoRenderer mRenderer;
 	private GestureDetector mGestureDetector;
-	private float mx;
-	private float my;
 
 	public DemoGLSurfaceView(DemoActivity context) {
 		super(context);

@@ -32,9 +32,9 @@ public class Ray {
 		this.k = k;
 		
 		// inverses of direction component
-		this.ii = 1.0f/i;
-		this.ij = 1.0f/j;
-		this.ik = 1.0f/k;
+		this.ii = 1.0f/this.i;
+		this.ij = 1.0f/this.j;
+		this.ik = 1.0f/this.k;
 		this.sgn_ii = (ii >= 0);
 		this.sgn_ij = (ij >= 0);
 		this.sgn_ik = (ik >= 0);
