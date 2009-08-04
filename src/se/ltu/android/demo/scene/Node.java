@@ -38,29 +38,31 @@ public class Node extends Spatial {
 
 	public void attachChild(Spatial child) {
 		synchronized(children) {
-			synchronized(child) {
-				children.add(child);
-				if(child.hasParent()) {
-					child.detachFromParent();
-				}
-				child.parent = this;
-			}
+			children.add(child);
 		}
+		if(child.hasParent()) {
+			child.detachFromParent();
+		}
+		child.parent = this;
 	}
 	
 	public void detachChild(Spatial child) {
 		synchronized(children) {
 			children.remove(child);
-			child.parent = null;
 		}
+		child.parent = null;
 	}
 	
 	public boolean hasChildren() {
-		return children.size() > 0;
+		synchronized(children) {
+			return children.size() > 0;
+		}
 	}
 	
 	public ArrayList<Spatial> getChildren() {
-		return children;
+		synchronized(children) {
+			return children;
+		}
 	}
 	
 	/**
@@ -68,47 +70,51 @@ public class Node extends Spatial {
 	 */
 	@Override
 	public void updateModelBound() {
-		int len = children.size();	
-		for(int i = 0; i < len; i++) {
-			children.get(i).updateModelBound();;
+		synchronized(children) {
+			int len = children.size();	
+			for(int i = 0; i < len; i++) {
+				children.get(i).updateModelBound();;
+			}
 		}
 	}
 	
 	@Override
 	public void updateWorldBound(boolean propagate) {
-		int len = children.size();
-		Spatial child;
-		AABBox cBound;
-		
-		worldBound.minX = worldBound.maxX = 0;
-		worldBound.minY = worldBound.maxY = 0;
-		worldBound.minZ = worldBound.maxZ = 0;
-		
-		for(int i = 0; i < len; i++) {
-			child = children.get(i);
-			child.updateWorldBound(false);
-			cBound = child.getWorldBound();
+		synchronized(children) {
+			int len = children.size();
+			Spatial child;
+			AABBox cBound;
 			
-			if(i == 0) {
-				worldBound.minX = cBound.minX;
-				worldBound.minY = cBound.minY;
-				worldBound.minZ = cBound.minZ;
-				worldBound.maxX = cBound.maxX;
-				worldBound.maxY = cBound.maxY;
-				worldBound.maxZ = cBound.maxZ;
-			} else {
-				if(cBound.minX < worldBound.minX)
+			worldBound.minX = worldBound.maxX = 0;
+			worldBound.minY = worldBound.maxY = 0;
+			worldBound.minZ = worldBound.maxZ = 0;
+			
+			for(int i = 0; i < len; i++) {
+				child = children.get(i);
+				child.updateWorldBound(false);
+				cBound = child.getWorldBound();
+				
+				if(i == 0) {
 					worldBound.minX = cBound.minX;
-				if(cBound.minY < worldBound.minY)
 					worldBound.minY = cBound.minY;
-				if(cBound.minZ < worldBound.minY)
 					worldBound.minZ = cBound.minZ;
-				if(cBound.maxX > worldBound.maxX)
 					worldBound.maxX = cBound.maxX;
-				if(cBound.maxY > worldBound.maxY)
 					worldBound.maxY = cBound.maxY;
-				if(cBound.maxZ > worldBound.maxZ)
 					worldBound.maxZ = cBound.maxZ;
+				} else {
+					if(cBound.minX < worldBound.minX)
+						worldBound.minX = cBound.minX;
+					if(cBound.minY < worldBound.minY)
+						worldBound.minY = cBound.minY;
+					if(cBound.minZ < worldBound.minY)
+						worldBound.minZ = cBound.minZ;
+					if(cBound.maxX > worldBound.maxX)
+						worldBound.maxX = cBound.maxX;
+					if(cBound.maxY > worldBound.maxY)
+						worldBound.maxY = cBound.maxY;
+					if(cBound.maxZ > worldBound.maxZ)
+						worldBound.maxZ = cBound.maxZ;
+				}
 			}
 		}
 		//worldBound.transform(transM);
@@ -151,9 +157,11 @@ public class Node extends Spatial {
 	public void updateTransform() {
 		super.updateTransform();
 		
-		int len = children.size();
-		for (int i = 0; i < len; i++) {
-			children.get(i).updateTransform();
+		synchronized (children) {
+			int len = children.size();
+			for (int i = 0; i < len; i++) {
+				children.get(i).updateTransform();
+			}
 		}
 	}
 
@@ -165,10 +173,12 @@ public class Node extends Spatial {
 		}
 		
 		if(ray.intersects(worldBound)) {
-			int len = children.size();
-			if(pickable) {
-				for(int i = 0; i < len; i++) {
-					children.get(i).calculatePick(ray, result);
+			synchronized (children) {
+				int len = children.size();
+				if(pickable) {
+					for(int i = 0; i < len; i++) {
+						children.get(i).calculatePick(ray, result);
+					}
 				}
 			}
 		}
@@ -177,34 +187,42 @@ public class Node extends Spatial {
 	@Override
 	public void update(long tpf) {
 		super.update(tpf);
-		int len = children.size();
-		for (int i = 0; i < len; i++) {
-			children.get(i).update(tpf);
+		synchronized (children) {
+			int len = children.size();
+			for (int i = 0; i < len; i++) {
+				children.get(i).update(tpf);
+			}
 		}
 	}
 
 	@Override
 	public void freeHardwareBuffers(GL10 gl) {
-		int len = children.size();
-		for (int i = 0; i < len; i++) {
-			children.get(i).freeHardwareBuffers(gl);
+		synchronized (children) {
+			int len = children.size();
+			for (int i = 0; i < len; i++) {
+				children.get(i).freeHardwareBuffers(gl);
+			}
 		}
 	}
 	
 
 	@Override
 	public void forgetHardwareBuffers() {
-		int len = children.size();
-		for (int i = 0; i < len; i++) {
-			children.get(i).forgetHardwareBuffers();
+		synchronized (children) {
+			int len = children.size();
+			for (int i = 0; i < len; i++) {
+				children.get(i).forgetHardwareBuffers();
+			}
 		}
 	}
 
 	@Override
 	public void generateHardwareBuffers(GL10 gl) {
-		int len = children.size();
-		for (int i = 0; i < len; i++) {
-			children.get(i).generateHardwareBuffers(gl);
+		synchronized (children) {
+			int len = children.size();
+			for (int i = 0; i < len; i++) {
+				children.get(i).generateHardwareBuffers(gl);
+			}
 		}
 	}
 }

@@ -228,9 +228,9 @@ public class Camera {
 	 */
 	public void translate(float x, float y, float z) {
 		synchronized(model) {
-			position[0] += x;
-			position[1] += y;
-			position[2] += z;
+			position[0] -= x;
+			position[1] -= y;
+			position[2] -= z;
 			Matrix.translateM(model, 0, -x, -y, -z);
 		}
 	}
@@ -244,9 +244,9 @@ public class Camera {
 			return;
 		}
 		synchronized(model) {
-			position[0] += vector3f[0];
-			position[1] += vector3f[1];
-			position[2] += vector3f[2];
+			position[0] -= vector3f[0];
+			position[1] -= vector3f[1];
+			position[2] -= vector3f[2];
 			Matrix.translateM(model, 0, -vector3f[0], -vector3f[1], -vector3f[2]);
 		}
 	}

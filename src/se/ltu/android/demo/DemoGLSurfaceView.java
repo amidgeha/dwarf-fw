@@ -6,7 +6,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.GestureDetector.SimpleOnGestureListener;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -16,6 +18,7 @@ import android.view.MotionEvent;
 class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 	private final static String TAG = "DemoGLSurfaceView";
 	private DemoRenderer mRenderer;
+	private GestureDetector mGestureDetector;
 	private float mx;
 	private float my;
 
@@ -27,6 +30,8 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 		getHolder().setFormat(PixelFormat.RGBA_8888);
 		mRenderer = new DemoRenderer();
 		setRenderer(mRenderer);
+		DemoGestureDetector demoGestDet = new DemoGestureDetector();
+		mGestureDetector = new GestureDetector(context, demoGestDet);
 		//setRenderMode(RENDERMODE_WHEN_DIRTY);
 	}
 	
@@ -40,28 +45,15 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 			case MotionEvent.ACTION_DOWN:
 				DemoGameThread.onTrackballClick();
 				break;
+			case MotionEvent.ACTION_MOVE:
+				DemoGameThread.onTrackballMove(event.getX(), event.getY());
 		}
 		return true;
 	};
-
+	
 	@Override
-	public boolean onTouchEvent(final MotionEvent event) {
-		long downtime = event.getEventTime() - event.getDownTime();
-		switch (event.getAction()) {
-		case MotionEvent.ACTION_DOWN:
-			mx = event.getX();
-			my = event.getY();
-			Log.d(TAG, "Touch down");
-		case MotionEvent.ACTION_MOVE:
-			break;
-		case MotionEvent.ACTION_UP:
-			Log.d(TAG, "Touch up "+downtime);
-			if (downtime > 0 && downtime < 400) {
-				DemoGameThread.onTap(mx, my);
-			}
-			break;
-		}
-		return true;
+	public boolean onTouchEvent(MotionEvent event) {
+		return mGestureDetector.onTouchEvent(event);
 	}
 
 	@Override
@@ -79,5 +71,30 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 			SensorHandler.handleMagData(event.timestamp, event.values);
 			break;
 		}
+	}
+	
+	private class DemoGestureDetector extends GestureDetector.SimpleOnGestureListener {
+
+		@Override
+		/*
+		 * This method must return true, otherwise the tap events will not
+		 * be triggered.
+		 */
+	    public boolean onDown(MotionEvent ev) {
+	        return true;
+	    }
+		
+		@Override
+		public boolean onDoubleTap(MotionEvent e) {
+			DemoGameThread.onDoubleTap(e.getX(), e.getY());
+			return true;
+		}
+
+		@Override
+		public boolean onSingleTapConfirmed(MotionEvent e) {
+			DemoGameThread.onSingleTap(e.getX(), e.getY());
+			return true;
+		}
+		
 	}
 }
