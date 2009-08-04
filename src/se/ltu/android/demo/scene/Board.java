@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 
-import android.util.Log;
 import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.scene.shapes.Box;
 import se.ltu.android.demo.util.BufferUtils;
@@ -16,9 +15,6 @@ import se.ltu.android.demo.util.BufferUtils;
  * @lastmodified $Date$
  */
 public class Board extends Node {
-	private static final String TAG = "Board";
-	private PickBox[] pickBoxes;
-
 	/**
 	 * @param name
 	 */
