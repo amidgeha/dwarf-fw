@@ -33,6 +33,8 @@ public abstract class Spatial {
 	protected float[] locTranslation = null;
 	protected float[] locRotation = null;
 	protected float[] locScale = null;
+	
+	private PieceData pieceData;
 		
 	public Spatial(String name) {
 		this.name = name;
@@ -160,6 +162,11 @@ public abstract class Spatial {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
+			return false;
+		if (pieceData == null) {
+			if (other.pieceData != null)
+				return false;
+		} else if (!pieceData.equals(other.pieceData))
 			return false;
 		return true;
 	}
@@ -290,5 +297,23 @@ public abstract class Spatial {
 	 */
 	public boolean isPickable() {
 		return pickable;
+	}
+
+	/**
+	 * @param dataObject the dataObject to set
+	 */
+	public void setPieceData(PieceData pieceData) {
+		this.pieceData = pieceData;
+	}
+
+	/**
+	 * @return the dataObject
+	 */
+	public PieceData getPieceData() {
+		return pieceData;
+	}
+	
+	public boolean hasPieceData() {
+		return (pieceData != null);
 	}
 }
