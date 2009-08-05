@@ -60,46 +60,6 @@ public class AABBox {
 	}
 	
 	/**
-	 * Apply a transformation matrix on this box
-	 * As this box will still be axis aligned, the box might be larger.
-	 * @param mat column-major transformation matrix to apply
-	 */
-	public void transform(float[] matrix) {
-		if(matrix.length != 16) {
-			Log.e(TAG, "The matrix size is wrong");
-			return;
-		}
-		float av, bv;
-		int col, row;
-		float[] oldMin = {minX, minY, minZ};
-		float[] oldMax = {maxX, maxY, maxZ};
-		float[] newMin = {matrix[12], matrix[13], matrix[14]};
-		float[] newMax = {matrix[12], matrix[13], matrix[14]};
-		for (col = 0; col < 3; col++) {
-			for (row = 0; row < 3; row++)
-			{
-				av = matrix[row+col*4] * oldMin[row];
-				bv = matrix[row+col*4] * oldMax[row];
-				if (av < bv)
-				{
-					newMin[col] += av;
-					newMax[col] += bv;
-				} else {
-					newMin[col] += bv;
-					newMax[col] += av;
-				}
-			}
-		}
-		// set the values to this box
-		minX = newMin[0];
-		minY = newMin[1];
-		minZ = newMin[2];
-		maxX = newMax[0];
-		maxY = newMax[1];
-		maxZ = newMax[2];
-	}
-	
-	/**
 	 * Apply a transformation matrix on another box and set the result
 	 * on this box. This box current values will be overwritten while the
 	 * other box will not be touched.

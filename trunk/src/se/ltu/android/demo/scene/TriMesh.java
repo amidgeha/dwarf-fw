@@ -1,6 +1,9 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.scene;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
@@ -31,15 +34,15 @@ public class TriMesh extends Spatial {
 	/**
 	 * Local center point of this geometry in x,y,z.
 	 */
-	protected float[] center = {0.0f, 0.0f, 0.0f};
-	//use char instead of short since char is unsigned (both 2-bytes long) 
-	protected CharBuffer indices;
+	protected float[] center = new float[3];
 	/**
 	 * Direct access to this TriMesh's vertices. If you modify this data
 	 * you must set the hasDirtyModelBound to true or the model bound
 	 * will not be updated.
 	 */
 	protected FloatBuffer vertices;
+	// char instead of short, since char is unsigned
+	protected CharBuffer indices;
 	protected FloatBuffer normals;
 	protected ByteBuffer colors;
 	protected FloatBuffer texcoords;
@@ -104,9 +107,15 @@ public class TriMesh extends Spatial {
 		clone.vertexCount = vertexCount;
 		clone.vertices = vertices.asReadOnlyBuffer();
 		clone.indices = indices.asReadOnlyBuffer();
-		clone.normals = normals.asReadOnlyBuffer();
-		clone.colors = colors.asReadOnlyBuffer();
-		clone.texcoords = texcoords.asReadOnlyBuffer();
+		if(normals != null) {
+			clone.normals = normals.asReadOnlyBuffer();
+		}
+		if(colors != null) {
+			clone.colors = colors.asReadOnlyBuffer();
+		}
+		if(texcoords != null) {
+			clone.texcoords = texcoords.asReadOnlyBuffer();
+		}
 		
 		clone.setLocalTranslation(locTranslation);
 		clone.setLocalRotation(locRotation);
@@ -170,7 +179,6 @@ public class TriMesh extends Spatial {
 				gl11.glColorPointer(4, GL11.GL_UNSIGNED_BYTE, 0, 0);
 			}
 			if(mNormalBufferIndex != 0) {
-				normals.rewind();
 				gl11.glEnableClientState(GL11.GL_NORMAL_ARRAY);
 				gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mNormalBufferIndex);
 				gl11.glNormalPointer(GL11.GL_FLOAT, 0, 0);
@@ -192,7 +200,6 @@ public class TriMesh extends Spatial {
 				gl11.glDisableClientState(GL11.GL_COLOR_ARRAY);
 			}
 			if(mNormalBufferIndex != 0) {
-				normals.rewind();
 				gl11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
 			}
 			if(mTexCoordsBufferIndex != 0) {
@@ -437,6 +444,10 @@ public class TriMesh extends Spatial {
 	
 	@Override
     public void forgetHardwareBuffers() {
+		if(cloneTarget != null) {
+			cloneTarget.forgetHardwareBuffers();
+			return;
+		}
         mVertBufferIndex = 0;
         mIndexBufferIndex = 0;
         mNormalBufferIndex = 0;
@@ -446,6 +457,12 @@ public class TriMesh extends Spatial {
     
     @Override
     public void freeHardwareBuffers(GL10 gl) {
+    	if(cloneTarget != null) {
+    		cloneTarget.freeHardwareBuffers(gl);
+    		forgetHardwareBuffers();
+    		return;
+    	}
+    	
         if (mVertBufferIndex != 0) {
             if (gl instanceof GL11) {
                 GL11 gl11 = (GL11)gl;
@@ -475,6 +492,17 @@ public class TriMesh extends Spatial {
     
     @Override    
     public void generateHardwareBuffers(GL10 gl) {
+    	if(cloneTarget != null) {
+    		cloneTarget.generateHardwareBuffers(gl);
+    		mVertBufferIndex = cloneTarget.mVertBufferIndex;
+            mIndexBufferIndex = cloneTarget.mIndexBufferIndex;
+            mNormalBufferIndex = cloneTarget.mNormalBufferIndex;
+            mTexCoordsBufferIndex = cloneTarget.mTexCoordsBufferIndex;
+            mColorBufferIndex = cloneTarget.mColorBufferIndex;
+            mIndexCount = cloneTarget.mIndexCount;
+            return;
+    	}
+    	
         if (mVertBufferIndex == 0) {
             if (gl instanceof GL11) {
                 GL11 gl11 = (GL11)gl;
@@ -564,4 +592,150 @@ public class TriMesh extends Spatial {
 		}
 		return world_vectors;
 	}
+	
+	/**
+     * Writes the TriMesh's vertex data to a stream 
+     * @param s
+	 * @throws IOException 
+     */
+    public void exportModel(DataOutputStream s) throws IOException {
+    	int len;
+    	// write information
+    	s.writeInt(drawMode);
+    	s.writeInt(vertexCount);
+    	if(center != null) {
+    		s.writeInt(0);
+    	} else {
+    		s.writeInt(1);
+    		s.writeFloat(center[0]);
+    		s.writeFloat(center[1]);
+    		s.writeFloat(center[2]);
+    	}
+    	if (modelBound == null) {
+        	s.writeInt(0);
+        } else {
+        	s.writeInt(1);
+        	s.writeFloat(modelBound.minX);
+        	s.writeFloat(modelBound.minY);
+        	s.writeFloat(modelBound.minZ);
+        	s.writeFloat(modelBound.maxX);
+        	s.writeFloat(modelBound.maxY);
+        	s.writeFloat(modelBound.maxZ);
+        }
+        if (indices == null)
+            s.writeInt(0);
+        else {
+            s.writeInt(indices.limit());
+            indices.rewind();
+            len = indices.limit();
+            for (int i = 0; i < len; i++) {
+                s.writeChar(indices.get(i));
+            }
+        }
+        if (vertices == null)
+            s.writeInt(0);
+        else {
+            s.writeInt(vertices.limit());
+            vertices.rewind();
+            len = vertices.limit();
+            for (int i = 0; i < len; i++) {
+                s.writeFloat(vertices.get(i));
+            }
+        }
+        if (texcoords == null)
+            s.writeInt(0);
+        else {
+            s.writeInt(texcoords.limit());
+            texcoords.rewind();
+            len = texcoords.limit();
+            for (int i = 0; i < len; i++) {
+                s.writeFloat(texcoords.get(i));
+            }
+        }
+        
+        if (normals == null)
+            s.writeInt(0);
+        else {
+            s.writeInt(normals.limit());
+            normals.rewind();
+            len = normals.limit();
+            for (int i = 0; i < len; i++) {
+                s.writeFloat(normals.get(i));
+            }
+        }
+    }
+
+    /**
+     * Reads the model content of the given stream and set
+     * the read vertex data on this TriMesh.
+     * @param s
+     * @throws IOException
+     */
+    public void importModel(DataInputStream s) throws IOException {
+        int len;
+        drawMode = s.readInt();
+        vertexCount = s.readInt();
+        
+        if(s.readInt() == 0) {
+        	center = new float[3];
+        } else {
+        	center[0] = s.readFloat();
+        	center[1] = s.readFloat();
+        	center[2] = s.readFloat();
+        }
+        
+        if(s.readInt() == 0) {
+        	modelBound = new AABBox();
+        	hasDirtyModelBound = true;
+        } else {
+        	modelBound.minX = s.readFloat();
+        	modelBound.minY = s.readFloat();
+        	modelBound.minZ = s.readFloat();
+        	modelBound.maxX = s.readFloat();
+        	modelBound.maxY = s.readFloat();
+        	modelBound.maxZ = s.readFloat();
+        	hasDirtyModelBound = false;
+        }
+        
+        if((len = s.readInt()) == 0) {
+        	indices = null;
+        } else {
+        	CharBuffer buf = BufferUtils.createCharBuffer(len);
+        	buf.clear();
+            for (int x = 0; x < len; x++)
+                buf.put(s.readChar());
+            indices = buf;
+        }
+        
+        if((len = s.readInt()) == 0) {
+        	vertices = null;
+        } else {
+        	FloatBuffer buf = BufferUtils.createFloatBuffer(len);
+        	buf.clear();
+            for (int x = 0; x < len; x++)
+                buf.put(s.readFloat());
+            vertices = buf;
+        }
+        
+        if((len = s.readInt()) == 0) {
+        	texcoords = null;
+        } else {
+        	FloatBuffer buf = BufferUtils.createFloatBuffer(len);
+        	buf.clear();
+            for (int x = 0; x < len; x++)
+                buf.put(s.readFloat());
+            texcoords = buf;
+        }
+        
+        if((len = s.readInt()) == 0) {
+        	normals = null;
+        } else {
+        	FloatBuffer buf = BufferUtils.createFloatBuffer(len);
+        	buf.clear();
+            for (int x = 0; x < len; x++)
+                buf.put(s.readFloat());
+            normals = buf;
+        }
+    }
+
 }
