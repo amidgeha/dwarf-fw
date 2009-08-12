@@ -1,5 +1,5 @@
 /* SVN FILE: $Id$ */
-package se.ltu.android.demo.filter;
+package se.ltu.android.demo.sensors;
 
 /**
  * A Multiple-Pass (and somewhat weighted) Moving Average Filter.

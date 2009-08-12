@@ -8,10 +8,11 @@ import javax.microedition.khronos.opengles.GL10;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import se.ltu.android.demo.intersection.AABBox;
-import se.ltu.android.demo.intersection.PickResult;
-import se.ltu.android.demo.intersection.Ray;
 import se.ltu.android.demo.scene.animation.KeyFrameAnimation;
+import se.ltu.android.demo.scene.intersection.AABBox;
+import se.ltu.android.demo.scene.intersection.PickResult;
+import se.ltu.android.demo.scene.intersection.Ray;
+import se.ltu.android.demo.scene.state.Material;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -35,6 +36,7 @@ public abstract class Spatial {
 	protected float[] locScale = null;
 	
 	private PieceData pieceData;
+	protected boolean isRenderable = false;
 		
 	public Spatial(String name) {
 		this.name = name;
@@ -315,5 +317,17 @@ public abstract class Spatial {
 	
 	public boolean hasPieceData() {
 		return (pieceData != null);
+	}
+	
+	/**
+	 * @param material material to set or null to unset
+	 */
+	public abstract void setMaterial(Material material);
+
+	/**
+	 * @return
+	 */
+	public boolean isRenderable() {
+		return isRenderable;
 	}
 }

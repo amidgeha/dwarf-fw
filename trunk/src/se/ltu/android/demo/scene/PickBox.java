@@ -1,9 +1,7 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.scene;
 
-import javax.microedition.khronos.opengles.GL10;
-
-import se.ltu.android.demo.intersection.AABBox;
+import se.ltu.android.demo.scene.intersection.AABBox;
 
 /**
  * Represents a bounding box that can be placed anywhere in
@@ -13,7 +11,7 @@ import se.ltu.android.demo.intersection.AABBox;
  * @version $Revision$
  * @lastmodified $Date$
  */
-public class PickBox extends Spatial {
+public class PickBox extends MetaLeaf {
 	AABBox modelBound;
 	
 	public PickBox(String name, AABBox bound) {
@@ -21,37 +19,6 @@ public class PickBox extends Spatial {
 		modelBound = bound;
 	}
 
-	/**
-	 * Empty implementation. Does nothing on a PickBox.
-	 * @see se.ltu.android.demo.scene.Spatial#draw(javax.microedition.khronos.opengles.GL10)
-	 */
-	@Override
-	public void draw(GL10 gl) {
-	}
-
-	/**
-	 * Empty implementation. Does nothing on a PickBox.
-	 * @see se.ltu.android.demo.scene.Spatial#freeHardwareBuffers(javax.microedition.khronos.opengles.GL10)
-	 */
-	@Override
-	public void freeHardwareBuffers(GL10 gl) {
-	}
-	
-	/* (non-Javadoc)
-	 * @see se.ltu.android.demo.scene.Spatial#forgetHardwareBuffers()
-	 */
-	@Override
-	public void forgetHardwareBuffers() {
-	}
-
-	/**
-	 * Empty implementation. Does nothing on a PickBox.
-	 * @see se.ltu.android.demo.scene.Spatial#generateHardwareBuffers(javax.microedition.khronos.opengles.GL10)
-	 */
-	@Override
-	public void generateHardwareBuffers(GL10 gl) {
-	}
-	
 	/**
 	 * Sets the bounding volume.
 	 * @param bound custom bounding volume

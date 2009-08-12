@@ -1,5 +1,5 @@
 /* SVN FILE: $Id$ */
-package se.ltu.android.demo.light;
+package se.ltu.android.demo.scene.state;
 
 import javax.microedition.khronos.opengles.GL10;
 

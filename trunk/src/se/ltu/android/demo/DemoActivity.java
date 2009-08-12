@@ -8,6 +8,7 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Debug;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -45,6 +46,7 @@ public class DemoActivity extends Activity {
         mGLView = new DemoGLSurfaceView(this);
         setContentView(mGLView);
         mGLView.requestFocus();
+        mGLView.setRenderWhenDirty(true);
         mGLView.setFocusableInTouchMode(true);
         
         mGameThread = new DemoGameThread(mGLView);
@@ -76,5 +78,6 @@ public class DemoActivity extends Activity {
     	// unregister listener for all sensors
     	mSensorManager.unregisterListener(mGLView);
         super.onStop();
+        Debug.stopMethodTracing();
     }
 }

@@ -1,9 +1,8 @@
 /* SVN FILE: $Id$ */
-package se.ltu.android.demo.intersection;
+package se.ltu.android.demo.scene.intersection;
 
 /**
- * A ray with methods for AABB intersection tests
- * 
+ * A basic ray with intersection test. 
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$

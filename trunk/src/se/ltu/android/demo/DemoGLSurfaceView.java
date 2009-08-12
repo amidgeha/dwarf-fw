@@ -1,7 +1,7 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo;
 
-import android.graphics.PixelFormat;
+import se.ltu.android.demo.sensors.SensorHandler;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -19,15 +19,11 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 
 	public DemoGLSurfaceView(DemoActivity context) {
 		super(context);
-		//setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
-		// We need a surface with a depth buffer and an alpha channel
-		//setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-		getHolder().setFormat(PixelFormat.RGBA_8888);
+
 		mRenderer = new DemoRenderer();
 		setRenderer(mRenderer);
-		DemoGestureDetector demoGestDet = new DemoGestureDetector();
-		mGestureDetector = new GestureDetector(context, demoGestDet);
-		//setRenderMode(RENDERMODE_WHEN_DIRTY);
+		
+		mGestureDetector = new GestureDetector(context, new DemoGestureDetector());
 	}
 	
 	public DemoRenderer getRenderer() {
@@ -70,11 +66,11 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 	
 	private class DemoGestureDetector extends GestureDetector.SimpleOnGestureListener {
 
-		@Override
 		/*
 		 * This method must return true, otherwise the tap events will not
 		 * be triggered.
 		 */
+		@Override
 	    public boolean onDown(MotionEvent ev) {
 	        return true;
 	    }

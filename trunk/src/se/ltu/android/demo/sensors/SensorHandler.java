@@ -1,7 +1,6 @@
 /* SVN FILE: $Id$ */
-package se.ltu.android.demo;
+package se.ltu.android.demo.sensors;
 
-import se.ltu.android.demo.filter.MPMovingAverageFilter;
 import android.hardware.SensorManager;
 
 /**

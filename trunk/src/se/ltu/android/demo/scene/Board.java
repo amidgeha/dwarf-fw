@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 
-import se.ltu.android.demo.intersection.AABBox;
+import se.ltu.android.demo.scene.intersection.AABBox;
 import se.ltu.android.demo.scene.shapes.Box;
 import se.ltu.android.demo.util.BufferUtils;
 
@@ -24,8 +24,10 @@ public class Board extends Node {
 		
 		Box darkSquare = new Box("darkSquare", 1.0f, 1.0f, 0.2f);
 		Box lightSquare = new Box("lightSquare", 1.0f, 1.0f, 0.2f);
-		darkSquare.setSolidColor(new float[]{0.4f,0.2f,0.08f,1.0f});
-		lightSquare.setSolidColor(new float[]{0.87f,0.62f,0.45f,1.0f});
+		//darkSquare.setSolidColor(new float[]{0.4f,0.2f,0.08f,1.0f});
+		//lightSquare.setSolidColor(new float[]{0.87f,0.62f,0.45f,1.0f});
+		darkSquare.setSolidColor(new float[]{0.1f,0.1f,0.1f,1.0f});
+		lightSquare.setSolidColor(new float[]{1.0f,1.0f,1.0f,1.0f});
 		
 		TriMesh curSquare = null;
 		PickBox pickBox = null;

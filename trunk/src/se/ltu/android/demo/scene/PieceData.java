@@ -15,6 +15,7 @@ public class PieceData {
 	 * 0 to 7 corresponds to 1 to 8 on a chess board
 	 */
 	public int row_index = -1;
+	public boolean isDark;
 	
 	public PieceData() {
 		col_index = row_index = -1;
@@ -56,6 +57,21 @@ public class PieceData {
 	
 	public boolean placedInBoard() {
 		return (col_index >= 0 && col_index <= 7 && row_index >= 0 && row_index <= 7);
+	}
+	
+	/**
+	 * Set whether the piece is dark or light
+	 * @param b true if dark, else light
+	 */
+	public void setDark(boolean b) {
+		isDark = b;
+	}
+	
+	/**
+	 * @return true if the piece is dark, otherwise it's light
+	 */
+	public boolean isDark() {
+		return isDark;
 	}
 	
 	public static int getColIndex(char col) {

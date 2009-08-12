@@ -1,5 +1,5 @@
 /* SVN FILE: $Id$ */
-package se.ltu.android.demo.intersection;
+package se.ltu.android.demo.scene.intersection;
 
 import java.util.TreeMap;
 

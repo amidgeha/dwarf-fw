@@ -1,7 +1,7 @@
 /* SVN FILE: $Id$ */
-package se.ltu.android.demo.camera;
+package se.ltu.android.demo.scene.camera;
 
-import se.ltu.android.demo.intersection.Ray;
+import se.ltu.android.demo.scene.intersection.Ray;
 import android.opengl.Matrix;
 
 /**
@@ -52,13 +52,14 @@ public class Camera {
 	 * @param zFar Distance to far-plane
 	 */
 	public static void setPerspective(float fovy, float width, float height, float zNear, float zFar) {		
-		Camera.near_height = (float) Math.tan((fovy * DEG_TO_RAD) / 2);
+		float tan_fovy_half = (float) Math.tan((fovy * DEG_TO_RAD) / 2);
+		Camera.near_height = zNear * tan_fovy_half;
 		Camera.zNear = zNear;
 		Camera.height = height;
 		Camera.half_width = width / 2;
 		Camera.half_height = height / 2;
 		Camera.aspect = width / height;
-		project[5] = 1 / Camera.near_height;  // = cot(fovy/2)
+		project[5] = 1 / tan_fovy_half;  // = cot(fovy/2)
 
 		// Remember, column major matrix
 		project[0] = project[5] / aspect;
