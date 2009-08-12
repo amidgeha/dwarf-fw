@@ -1,16 +1,14 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.scene;
 
-import javax.microedition.khronos.opengles.GL10;
-
-import se.ltu.android.demo.camera.Camera;
+import se.ltu.android.demo.scene.camera.Camera;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
-public class CameraNode extends Spatial {
+public class CameraNode extends MetaLeaf {
 	private Camera cam;
 	
 	/**
@@ -65,60 +63,6 @@ public class CameraNode extends Spatial {
 	 */
 	public void setCamera(Camera cam) {
 		this.cam = cam;
-	}
-
-	/**
-	 * Empty implementation. Does nothing on a Camera. Getting the view information
-	 * from the camera is handled in the renderer.
-	 * @see se.ltu.android.demo.scene.Spatial#draw(javax.microedition.khronos.opengles.GL10)
-	 */
-	@Override
-	public void draw(GL10 gl) {
-		// nothing to draw
-	}
-
-	/**
-	 * Empty implementation. Does nothing on a Camera.
-	 * @see se.ltu.android.demo.scene.Spatial#freeHardwareBuffers(javax.microedition.khronos.opengles.GL10)
-	 */
-	@Override
-	public void freeHardwareBuffers(GL10 gl) {
-	}
-	
-	/**
-	 * Empty implementation. Does nothing on a Camera.
-	 * @see se.ltu.android.demo.scene.Spatial#forgetHardwareBuffers()
-	 */
-	@Override
-	public void forgetHardwareBuffers() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/**
-	 * Empty implementation. Does nothing on a Camera.
-	 * @see se.ltu.android.demo.scene.Spatial#generateHardwareBuffers(javax.microedition.khronos.opengles.GL10)
-	 */
-	@Override
-	public void generateHardwareBuffers(GL10 gl) {
-	}
-
-	/**
-	 * Empty implementation. Does nothing on a Camera.
-	 * @see se.ltu.android.demo.scene.Spatial#updateModelBound()
-	 */
-	@Override
-	public void updateModelBound() {
-	}
-
-	/**
-	 * Empty implementation. Does nothing on a Camera and since there
-	 * is no change of the world bound in a camera node, there is no
-	 * need for a propagation.
-	 * @see se.ltu.android.demo.scene.Spatial#updateWorldBound(boolean)
-	 */
-	@Override
-	public void updateWorldBound(boolean propagate) {
 	}
 	
 	@Override

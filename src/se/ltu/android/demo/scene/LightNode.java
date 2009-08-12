@@ -3,7 +3,7 @@ package se.ltu.android.demo.scene;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import se.ltu.android.demo.light.Light;
+import se.ltu.android.demo.scene.state.Light;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -18,10 +18,12 @@ public class LightNode extends Node {
 	 */
 	public LightNode(String name) {
 		super(name);
+		isRenderable = true;
 	}
 	
 	public LightNode(String name, Light light) {
 		super(name);
+		isRenderable = true;
 		this.light = light;
 	}
 

@@ -1,5 +1,5 @@
 /* SVN FILE: $Id$ */
-package se.ltu.android.demo.model;
+package se.ltu.android.demo.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,9 +13,8 @@ import java.util.Collections;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import se.ltu.android.demo.intersection.AABBox;
 import se.ltu.android.demo.scene.TriMesh;
-import se.ltu.android.demo.util.BufferUtils;
+import se.ltu.android.demo.scene.intersection.AABBox;
 
 /**
  * A simple Obj-loader. Currently it only parse vertices and vertex face data.
@@ -29,7 +28,7 @@ import se.ltu.android.demo.util.BufferUtils;
  */
 /*
  * The implementation is large and memory consuming. The end result is nice though.
- * To reduce loading time, consider saving your Java object to a binary format.
+ * To reduce loading time, consider saving your resulting Java object to a binary format instead.
  */
 public class ObjLoader {
 	private final static String TAG = "ObjLoader";

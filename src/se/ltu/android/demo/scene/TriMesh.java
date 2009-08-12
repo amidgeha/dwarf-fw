@@ -11,7 +11,8 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
-import se.ltu.android.demo.intersection.AABBox;
+import se.ltu.android.demo.scene.intersection.AABBox;
+import se.ltu.android.demo.scene.state.Material;
 import se.ltu.android.demo.util.BufferUtils;
 
 import android.opengl.Matrix;
@@ -56,14 +57,17 @@ public class TriMesh extends Spatial {
 	private int mNormalBufferIndex;
 	private int mTexCoordsBufferIndex;
 	private int mIndexCount;
+	private Material material;
 	
 	public TriMesh(String name) {
 		super(name);
+		isRenderable = true;
 		modelBound = new AABBox();
 	}
 	
 	public TriMesh(String name, FloatBuffer vertices, CharBuffer indices) {
 		super(name);
+		isRenderable = true;
 		if(vertices.limit() % 3 != 0) {
 			Log.e(TAG, "Invalid vertex array length (Found: "
 					+vertices.limit()+", not divisable by 3) in "+name);
@@ -117,6 +121,8 @@ public class TriMesh extends Spatial {
 			clone.texcoords = texcoords.asReadOnlyBuffer();
 		}
 		
+		clone.material = material;
+		
 		clone.setLocalTranslation(locTranslation);
 		clone.setLocalRotation(locRotation);
 		clone.setLocalScale(locScale);
@@ -136,6 +142,12 @@ public class TriMesh extends Spatial {
 		}
 		gl.glPushMatrix();
 		gl.glMultMatrixf(transM, 0);
+
+		if(material != null) {
+			material.applyState(gl);
+		} else {
+			Material.removeState(gl);
+		}
 		
 		if (mVertBufferIndex == 0) {
 			
@@ -378,7 +390,17 @@ public class TriMesh extends Spatial {
 	 * @return a read-only FloatBuffer with this TriMesh's vertices
 	 */
 	public FloatBuffer getVertices() {
-		return vertices.asReadOnlyBuffer();
+		if(vertices != null) {
+			return vertices.asReadOnlyBuffer();
+		}
+		return null;
+	}
+	
+	public CharBuffer getIndices() {
+		if(indices != null) {
+			return indices.asReadOnlyBuffer();
+		}
+		return null;
 	}
 	
 	/**
@@ -492,7 +514,7 @@ public class TriMesh extends Spatial {
     
     @Override    
     public void generateHardwareBuffers(GL10 gl) {
-    	if(cloneTarget != null) {
+    	if(cloneTarget != null && cloneTarget.mVertBufferIndex == 0) {
     		cloneTarget.generateHardwareBuffers(gl);
     		mVertBufferIndex = cloneTarget.mVertBufferIndex;
             mIndexBufferIndex = cloneTarget.mIndexBufferIndex;
@@ -737,5 +759,17 @@ public class TriMesh extends Spatial {
             normals = buf;
         }
     }
+
+	/* (non-Javadoc)
+	 * @see se.ltu.android.demo.scene.Spatial#setMaterial(se.ltu.android.demo.light.Material)
+	 */
+	@Override
+	public void setMaterial(Material material) {
+		this.material = material;
+	}
+	
+	public Material getMaterial() {
+		return material;
+	}
 
 }

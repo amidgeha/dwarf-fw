@@ -7,9 +7,10 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.util.Log;
 
-import se.ltu.android.demo.intersection.AABBox;
-import se.ltu.android.demo.intersection.PickResult;
-import se.ltu.android.demo.intersection.Ray;
+import se.ltu.android.demo.scene.intersection.AABBox;
+import se.ltu.android.demo.scene.intersection.PickResult;
+import se.ltu.android.demo.scene.intersection.Ray;
+import se.ltu.android.demo.scene.state.Material;
 
 /**
  * @author Åke Svedin <ake.svedin@gmail.com>
@@ -222,6 +223,20 @@ public class Node extends Spatial {
 			int len = children.size();
 			for (int i = 0; i < len; i++) {
 				children.get(i).generateHardwareBuffers(gl);
+			}
+		}
+	}
+
+	/**
+	 * Set the material for all children of this node
+	 * @param material material to set
+	 */
+	@Override
+	public void setMaterial(Material material) {
+		synchronized (children) {
+			int len = children.size();
+			for (int i = 0; i < len; i++) {
+				children.get(i).setMaterial(material);
 			}
 		}
 	}

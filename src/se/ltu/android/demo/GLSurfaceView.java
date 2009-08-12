@@ -48,6 +48,7 @@ import android.view.SurfaceView;
  * @lastmodified $Date$
  */
 public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+	
     public GLSurfaceView(Context context) {
         super(context);
         init();
@@ -123,6 +124,17 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public void setEvent(Runnable r) {
         mGLThread.setEvent(r);
     }
+    
+    public void requestRender() {
+    	isDirty = true;
+    }
+      
+    /**
+	 * @param b
+	 */
+	public void setRenderWhenDirty(boolean b) {
+		renderWhenDirty = b;
+	}
 
     @Override
     protected void onDetachedFromWindow() {
@@ -365,7 +377,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              * asked to quit.
              */
             while (!mDone) {
-                ProfileRecorder.sSingleton.start(ProfileRecorder.PROFILE_FRAME);
                 /*
                  *  Update the asynchronous state (window size)
                  */
@@ -374,10 +385,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 boolean needStart = false;
                 synchronized (this) {
                     if (mEvent != null) {
-                        ProfileRecorder.sSingleton.start(ProfileRecorder.PROFILE_SIM);
                         mEvent.run();
                         mEvent = null;
-                        ProfileRecorder.sSingleton.stop(ProfileRecorder.PROFILE_SIM);
+
                     }
                     if (mPaused) {
                         mEglHelper.finish();
@@ -414,21 +424,20 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     tellRendererSurfaceChanged = false;
                 }
                 if ((w > 0) && (h > 0)) {
-                    ProfileRecorder.sSingleton.start(ProfileRecorder.PROFILE_DRAW);
-                    /* draw a frame here */
-                    mRenderer.drawFrame(gl);
-                    ProfileRecorder.sSingleton.stop(ProfileRecorder.PROFILE_DRAW);
-                   
-                    /*
-                     * Once we're done with GL, we need to call swapBuffers()
-                     * to instruct the system to display the rendered frame
-                     */
-                    ProfileRecorder.sSingleton.start(ProfileRecorder.PROFILE_PAGE_FLIP);
-                    mEglHelper.swap();
-                    ProfileRecorder.sSingleton.stop(ProfileRecorder.PROFILE_PAGE_FLIP);
+                	if(!renderWhenDirty || isDirty) {
+                		if(renderWhenDirty) {
+	                    	isDirty = false;
+	                    }
+	                    /* draw a frame here */
+	                    mRenderer.drawFrame(gl);
+	                   
+	                    /*
+	                     * Once we're done with GL, we need to call swapBuffers()
+	                     * to instruct the system to display the rendered frame
+	                     */
+	                    mEglHelper.swap();
+                	}
                 }
-                ProfileRecorder.sSingleton.stop(ProfileRecorder.PROFILE_FRAME);
-                ProfileRecorder.sSingleton.endFrame();
              }
 
 
@@ -537,6 +546,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
     private static final Semaphore sEglSemaphore = new Semaphore(1);
     private boolean mSizeChanged = true;
+    private boolean renderWhenDirty = false;
+    private boolean isDirty = true;
 
     private SurfaceHolder mHolder;
     private GLThread mGLThread;

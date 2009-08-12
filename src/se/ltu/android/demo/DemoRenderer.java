@@ -4,8 +4,8 @@ package se.ltu.android.demo;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.opengles.GL10;
 
-import se.ltu.android.demo.camera.Camera;
 import se.ltu.android.demo.scene.Node;
+import se.ltu.android.demo.scene.camera.Camera;
 
 import android.util.Log;
 
@@ -18,7 +18,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	private final static String TAG = "RENDERER";
 	private Node scene;	
 	private final float FOVY = 60.0f;
-	private final float ZNEAR = 1.0f;
+	private final float ZNEAR = 0.1f;
 	private final float ZFAR = 20.0f;
 	
 	long lastFrame = 0;
@@ -44,7 +44,6 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         gl.glCullFace(GL10.GL_BACK);
         gl.glEnable(GL10.GL_DEPTH_TEST);
         gl.glEnable(GL10.GL_LIGHTING);
-        gl.glEnable(GL10.GL_COLOR_MATERIAL);
         gl.glDepthFunc(GL10.GL_LEQUAL);
         gl.glShadeModel(GL10.GL_SMOOTH);
         
@@ -105,19 +104,16 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	}
 	
 	public void useVBOs(boolean value) {
-		use_vbos = true;
+		use_vbos = value;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see se.ltu.android.demo.GLSurfaceView.Renderer#getConfigSpec()
 	 */
 	@Override
 	public int[] getConfigSpec() {
+		// currently, we need a depth buffer but no alpha channel
 		int[] configSpec = {
-                EGL10.EGL_RED_SIZE,      8,
-                EGL10.EGL_GREEN_SIZE,    8,
-                EGL10.EGL_BLUE_SIZE,     8,
-                EGL10.EGL_ALPHA_SIZE,    8,
                 EGL10.EGL_DEPTH_SIZE,   16,
                 EGL10.EGL_NONE
         };
