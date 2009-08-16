@@ -37,8 +37,6 @@ import se.ltu.android.demo.util.ObjLoader;
 public class DemoGameThread extends Thread implements AnimationListener {
 	private final static String TAG = "GameThread";
 	private final static int TARGET_FPS = 25;
-	private static final float SELECT_COLOR_INC = 1.4f;
-	public static long timePerFrame = 1000;
 	/**
 	 * [0] = x coordinate<br>
 	 * [1] = y coordinate<br>
@@ -52,7 +50,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	 * [3] = on click (0 = false, true otherwise)<br>
 	 */
 	private static float[] trackInput = new float[4];
-	
+	private long timePerFrame = 1000;
 	private long timeTarget;
 	private Node world;
 	private TriMesh[][] board_data = new TriMesh[8][8];
@@ -60,15 +58,23 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	private boolean isRunning = true;
 	private boolean isPaused = false;
 	private TriMesh pickedMesh;
-	private Material savedMat;
-	private Material selectedMat = new Material();
-	private Camera[] camList; 	// list of available cameras
-	private int iCam = 0; 		// camera pointer
+	
+	// 
 	private boolean moving_piece = false;
 	private boolean moving_camera = false;
+	
+	// Camera variables
+	private Camera[] camList; 	// list of available cameras
+	private int iCam = 0; 		// camera pointer
 	private CameraNode camNode = new CameraNode("Camera");	//used for animation camera movement
 	private float[] modelM = new float[16];
-	private int iCamSensor = 0;
+	private int iCamSensor = 0;	// marks which camera that 
+	
+	// Materials for the pieces
+	private Material lightMat;
+	private Material darkMat;
+	private Material lightMatPicked;
+	private Material darkMatPicked;
 
 	public DemoGameThread(DemoGLSurfaceView glview) {
 		setName("GameThread");
@@ -80,14 +86,14 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		camList[0].setIdentity();
 		camList[0].setPosition(0, 0, 9);
 
-		camList[1] = new Camera();
-		camList[1].lookAt(5, -5, 3, 0, 0, -2.9f, 0, 0, 1);
-
+		camList[1] = new Camera(); // used for rotation
+		iCamSensor = 1;
+		
 		camList[2] = new Camera();
-		camList[2].lookAt(6, 0, 6, 0, 0, -2.9f, 0, 0, 1);
+		camList[2].lookAt(5, -5, 3, 0, 0, -2.9f, 0, 0, 1);
 
-		camList[3] = new Camera(); // used for rotation
-		iCamSensor = 3;
+		camList[3] = new Camera();
+		camList[3].lookAt(6, 0, 6, 0, 0, -2.9f, 0, 0, 1);
 	}
 
 	public void run() {
@@ -98,6 +104,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 
 		long lastTime = System.currentTimeMillis();
 		long timeSleep;
+		// Good place to put a method trace
 		//Debug.startMethodTracing("mtrace");
 		while (isRunning) {
 			while (isPaused && isRunning) {
@@ -106,12 +113,19 @@ public class DemoGameThread extends Thread implements AnimationListener {
 				} catch (InterruptedException e) {
 				}
 			}
-			// this thread have some control over the frame rate
-			// especially timePerFrame will be useful in
-			// animations
+			/*
+			 * This thread have some control over the frame rate
+			 * especially timePerFrame will be useful in animations
+			 */
 			timePerFrame = System.currentTimeMillis() - lastTime;
 			lastTime = System.currentTimeMillis();
 			update();
+			/* 
+			 * We want to sleep because we don't need to update as fast as possible.
+			 * This way the renderer gets more time and we get a slightly higher frame rate.
+			 * The last part on timeSleep (+ lastTime - System.currentTimeMillis()) is rather
+			 * important to get smooth animations.
+			 */
 			timeSleep = timeTarget - timePerFrame + lastTime - System.currentTimeMillis();
 			if (timeSleep > 0) {
 				try {
@@ -123,19 +137,14 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	}
 
 	private void update() {
-		// updateState();
 		updateInput();
-		// updateAI();
-		// updatePhysics();
 		world.update(timePerFrame); // updates animations
 		updateCamera();
-		// updateSound();
 		mGLView.requestRender();
 	}
 
 	private void updateCamera() {
-		if (iCam == iCamSensor) {
-			SensorHandler.getRotM4(modelM);
+		if (iCam == iCamSensor && SensorHandler.getRotM4(modelM)) {
 			camList[iCam].setRotationM(modelM);
 		}
 	}
@@ -149,7 +158,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	 * @return
 	 */
 	private void checkTap() {
-		Ray pickRay = null; // = mGLView.getRenderer().getPickRay();
+		Ray pickRay = null;
 		PickResult result = null;
 		int nTaps = 0;
 
@@ -160,7 +169,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 						tapCoords[1]);
 			}
 			if (tapCoords[2] == 2 && !moving_camera) {
-				// only move camera 0 and 3 (above and sensor camera)
+				// only move camera 0 and iCamSensor (straight above and sensor camera)
 				if(iCam == 0 || iCam == iCamSensor) {
 					nTaps = 2;
 					pickRay = camList[iCam].calculatePickRay(tapCoords[0],
@@ -196,18 +205,41 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			}
 			trackInput[3] = 0;
 			if (trackInput[2] != 0) {
-				/*
-				if(iCam == iCamSensor) {
-					// special case because of inverse rotation matrix ?
-					trackInput[1] = -trackInput[1];
+				float[] pos = camList[iCam].getPosition();
+				float newpos = pos[2] + trackInput[1];
+				switch(iCam) {
+				case 0:
+					newpos = clamp(-1, 15, newpos);
+					break;
+				case 1:
+					newpos = clamp(-15, 15, newpos);
+					break;
+					default:
+						newpos = clamp(-1, 9, newpos);
 				}
-				*/
-				camList[iCam].translate(0, 0, trackInput[1]);
+				if(iCam == 0 || iCam == 1) {
+					camList[iCam].setPosition(pos[0], pos[1], newpos);
+				} else {
+					camList[iCam].lookAt(pos[0], pos[1], newpos, 0, 0, -2.9f, 0, 0, 1);
+				}
 				trackInput[0] = 0;
 				trackInput[1] = 0;
 				trackInput[2] = 0;
 			}
 		}
+	}
+
+	/**
+	 * Clamp value between lower and upper
+	 */
+	private float clamp(float lower, float upper, float value) {
+		if(value > upper) {
+			return upper;
+		}
+		if(value < lower) {
+			return lower;
+		}
+		return value;
 	}
 
 	private void handleSingleTap(PickResult result) {
@@ -302,26 +334,21 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	 * 
 	 */
 	private void unselectPick() {
-		pickedMesh.setMaterial(savedMat);
+		if(pickedMesh.getPieceData().isDark()) {
+			pickedMesh.setMaterial(darkMat);
+		} else {
+			pickedMesh.setMaterial(lightMat);
+		}
 		pickedMesh = null;		
 	}
 	
 	private void selectPick(TriMesh spatial) {
-		float[] color4f;
 		pickedMesh = spatial;
-		savedMat = pickedMesh.getMaterial();
-		selectedMat.copyFrom(savedMat);
-		color4f = selectedMat.getAmbient();
-		increaseColor(color4f, SELECT_COLOR_INC);
-		color4f = selectedMat.getDiffuse();
-		increaseColor(color4f, SELECT_COLOR_INC);
-		pickedMesh.setMaterial(selectedMat);
-	}
-
-	private void increaseColor(float[] color4f, float amount) {
-		color4f[0] = Math.min(color4f[0] * amount, 1.0f);
-		color4f[1] = Math.min(color4f[1] * amount, 1.0f);
-		color4f[2] = Math.min(color4f[2] * amount, 1.0f);
+		if(pickedMesh.getPieceData().isDark()) {
+			pickedMesh.setMaterial(darkMatPicked);
+		} else {
+			pickedMesh.setMaterial(lightMatPicked);
+		}
 	}
 
 	public void onPause() {
@@ -359,17 +386,29 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		board.setMaterial(defaultMat);
 		board.setLocalTranslation(0, 0, -2.9f);
 		
-		Material lightMat = new Material();
+		lightMat = new Material();
 		lightMat.setAmbient(1, 0.5f, 0, 1);
 		lightMat.setDiffuse(1, 0.5f, 0, 1);
 		lightMat.setSpecular(0.9f, 0.9f, 0.9f, 1.0f);
 		lightMat.setShininess(40);
 		
-		Material darkMat = new Material();
+		darkMat = new Material();
 		darkMat.setAmbient(0, 0.4f, 0.8f, 1);
 		darkMat.setDiffuse(0, 0.4f, 0.8f, 1);
 		darkMat.setSpecular(0.9f, 0.9f, 0.9f, 1.0f);
 		darkMat.setShininess(40);
+		
+		lightMatPicked = new Material();
+		lightMatPicked.copyFrom(lightMat);
+		lightMatPicked.setAmbient(1, 0.86f, 0.31f, 1);
+		lightMatPicked.setDiffuse(1, 0.86f, 0.31f, 1);
+		
+		darkMatPicked = new Material();
+		darkMatPicked.copyFrom(darkMat);
+		darkMatPicked.setAmbient(0.26f, 0.82f, 1, 1);
+		darkMatPicked.setDiffuse(0.26f, 0.82f, 1, 1);
+		
+		PieceData pData;
 		
 		try {
 			char col = 'c';
@@ -380,7 +419,9 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			pawn.importModel(dis);
 			pawn.setLocalTranslation(PieceData.getColPos(col), PieceData
 					.getRowPos(row), -2.8f);
-			pawn.setPieceData(new PieceData(col, row));
+			pData = new PieceData(col, row);
+			pData.setDark(false);
+			pawn.setPieceData(pData);
 			pawn.setMaterial(lightMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = pawn;
 			world.attachChild(pawn);
@@ -393,7 +434,9 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			knight.importModel(dis);
 			knight.setLocalTranslation(PieceData.getColPos(col), PieceData
 					.getRowPos(row), -2.8f);
-			knight.setPieceData(new PieceData(col, row));
+			pData = new PieceData(col, row);
+			pData.setDark(false);
+			knight.setPieceData(pData);
 			knight.setMaterial(lightMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = knight;
 			world.attachChild(knight);
@@ -406,7 +449,9 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			king.importModel(dis);
 			king.setLocalTranslation(PieceData.getColPos(col), PieceData
 					.getRowPos(row), -2.8f);
-			king.setPieceData(new PieceData(col, row));
+			pData = new PieceData(col, row);
+			pData.setDark(false);
+			king.setPieceData(pData);
 			king.setMaterial(lightMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = king;
 			world.attachChild(king);
@@ -417,6 +462,9 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			mesh.setLocalTranslation(PieceData.getColPos(col), PieceData
 					.getRowPos(row), -2.8f);
 			mesh.setPieceData(new PieceData(col, row));
+			pData = new PieceData(col, row);
+			pData.setDark(true);
+			mesh.setPieceData(pData);
 			mesh.setMaterial(darkMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = mesh;
 			world.attachChild(mesh);
@@ -427,6 +475,9 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			mesh.setLocalTranslation(PieceData.getColPos(col), PieceData
 					.getRowPos(row), -2.8f);
 			mesh.setPieceData(new PieceData(col, row));
+			pData = new PieceData(col, row);
+			pData.setDark(true);
+			mesh.setPieceData(pData);
 			mesh.setMaterial(darkMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = mesh;
 			world.attachChild(mesh);

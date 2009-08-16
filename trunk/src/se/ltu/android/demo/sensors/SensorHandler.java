@@ -31,22 +31,21 @@ public abstract class SensorHandler {
 	 *            array of values with length 3
 	 */
 	public static void handleAccData(long timestamp, float[] data) {
-		acc_raw[0] = data[0];
-		acc_raw[1] = data[1];
-		acc_raw[2] = data[2];
-
-		if (acc_raw[0] < accBuffer[0] - ACC_BUFFER_OFFSET
-				|| acc_raw[0] > accBuffer[0] + ACC_BUFFER_OFFSET
-				|| acc_raw[1] < accBuffer[1] - ACC_BUFFER_OFFSET
-				|| acc_raw[1] > accBuffer[1] + ACC_BUFFER_OFFSET
-				|| acc_raw[2] < accBuffer[2] - ACC_BUFFER_OFFSET
-				|| acc_raw[2] > accBuffer[2] + ACC_BUFFER_OFFSET) {
-			accBuffer[0] = acc_raw[0];
-			accBuffer[1] = acc_raw[1];
-			accBuffer[2] = acc_raw[2];
-		}
-		
 		synchronized (accLock) {
+			acc_raw[0] = data[0];
+			acc_raw[1] = data[1];
+			acc_raw[2] = data[2];
+	
+			if (acc_raw[0] < accBuffer[0] - ACC_BUFFER_OFFSET
+					|| acc_raw[0] > accBuffer[0] + ACC_BUFFER_OFFSET
+					|| acc_raw[1] < accBuffer[1] - ACC_BUFFER_OFFSET
+					|| acc_raw[1] > accBuffer[1] + ACC_BUFFER_OFFSET
+					|| acc_raw[2] < accBuffer[2] - ACC_BUFFER_OFFSET
+					|| acc_raw[2] > accBuffer[2] + ACC_BUFFER_OFFSET) {
+				accBuffer[0] = acc_raw[0];
+				accBuffer[1] = acc_raw[1];
+				accBuffer[2] = acc_raw[2];
+			}
 			accFilter.addSamples(accBuffer, timestamp);
 		}
 	}
@@ -58,22 +57,21 @@ public abstract class SensorHandler {
 	 *            array of values with length 3
 	 */
 	public static void handleMagData(long timestamp, float[] data) {
-		mag_raw[0] = data[0];
-		mag_raw[1] = data[1];
-		mag_raw[2] = data[2];
-
-		if (mag_raw[0] < magBuffer[0] - MAG_BUFFER_OFFSET
-				|| mag_raw[0] > magBuffer[0] + MAG_BUFFER_OFFSET
-				|| mag_raw[1] < magBuffer[1] - MAG_BUFFER_OFFSET
-				|| mag_raw[1] > magBuffer[1] + MAG_BUFFER_OFFSET
-				|| mag_raw[2] < magBuffer[2] - MAG_BUFFER_OFFSET
-				|| mag_raw[2] > magBuffer[2] + MAG_BUFFER_OFFSET) {
-			magBuffer[0] = mag_raw[0];
-			magBuffer[1] = mag_raw[1];
-			magBuffer[2] = mag_raw[2];
-		}
-
 		synchronized (magLock) {
+			mag_raw[0] = data[0];
+			mag_raw[1] = data[1];
+			mag_raw[2] = data[2];
+
+			if (mag_raw[0] < magBuffer[0] - MAG_BUFFER_OFFSET
+					|| mag_raw[0] > magBuffer[0] + MAG_BUFFER_OFFSET
+					|| mag_raw[1] < magBuffer[1] - MAG_BUFFER_OFFSET
+					|| mag_raw[1] > magBuffer[1] + MAG_BUFFER_OFFSET
+					|| mag_raw[2] < magBuffer[2] - MAG_BUFFER_OFFSET
+					|| mag_raw[2] > magBuffer[2] + MAG_BUFFER_OFFSET) {
+				magBuffer[0] = mag_raw[0];
+				magBuffer[1] = mag_raw[1];
+				magBuffer[2] = mag_raw[2];
+			}
 			magFilter.addSamples(magBuffer, timestamp);
 		}
 	}

@@ -610,7 +610,6 @@ public class TriMesh extends Spatial {
 			world_vectors[i] = world_v[0];
 			world_vectors[i+1] = world_v[1];
 			world_vectors[i+2] = world_v[2];
-			//Log.d(TAG, "W Vector: ("+world_v[0]+", "+world_v[1]+", "+world_v[2]+")");
 		}
 		return world_vectors;
 	}

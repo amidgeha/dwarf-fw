@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 
+import android.util.Log;
+
 import se.ltu.android.demo.scene.intersection.AABBox;
 import se.ltu.android.demo.scene.shapes.Box;
 import se.ltu.android.demo.util.BufferUtils;
@@ -108,7 +110,7 @@ public class Board extends Node {
 			if(child instanceof TriMesh) {
 				triChild = (TriMesh)child;
 				
-				iOffset = vertices.position()/3;
+				iOffset = (vertices.position()+1)/3;
 				
 				triChild.updateTransform();
 				vertices.put(triChild.getWorldVertices());
