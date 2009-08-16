@@ -8,7 +8,6 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Debug;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -18,7 +17,7 @@ import android.view.WindowManager;
  * @lastmodified $Date$
  */
 public class DemoActivity extends Activity {
-	static final String TAG = "TestGL";
+	private static final String TAG = "TestGL";
 	private DemoGLSurfaceView mGLView;
 	private SensorManager mSensorManager;
 	private ArrayList<Sensor> sensors;
@@ -37,10 +36,8 @@ public class DemoActivity extends Activity {
         // prepare listening to sensors
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         sensors = new ArrayList<Sensor>();
-        //sensors.add((mSensorManager.getSensorList(Sensor.TYPE_ORIENTATION)).get(0));
         sensors.add((mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER)).get(0));
         sensors.add((mSensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD)).get(0));
-        //mSensorHandler.start();
         
         // set opengl view
         mGLView = new DemoGLSurfaceView(this);
@@ -78,6 +75,8 @@ public class DemoActivity extends Activity {
     	// unregister listener for all sensors
     	mSensorManager.unregisterListener(mGLView);
         super.onStop();
-        Debug.stopMethodTracing();
+        // Good place to stop method trace. See DemoGameThread.run() for a
+        // good place to start a method trace after resources are loaded.
+        //Debug.stopMethodTracing();
     }
 }
