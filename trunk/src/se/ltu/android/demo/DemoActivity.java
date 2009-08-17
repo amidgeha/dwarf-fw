@@ -12,6 +12,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 /**
+ * Entry point of the application. Responsible for starting up the application,
+ * pausing/resuming and so on.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$

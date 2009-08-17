@@ -35,8 +35,7 @@ public abstract class Spatial {
 	protected float[] locRotation = null;
 	protected float[] locScale = null;
 	
-	private PieceData pieceData;
-	protected boolean isRenderable = false;
+	private Object dataObject;
 		
 	public Spatial(String name) {
 		this.name = name;
@@ -148,8 +147,9 @@ public abstract class Spatial {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Test this spatial for equality with another spatial.
+	 * They are considered equal if the names are equal
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -165,10 +165,10 @@ public abstract class Spatial {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (pieceData == null) {
-			if (other.pieceData != null)
+		if (dataObject == null) {
+			if (other.dataObject != null)
 				return false;
-		} else if (!pieceData.equals(other.pieceData))
+		} else if (!dataObject.equals(other.dataObject))
 			return false;
 		return true;
 	}
@@ -209,10 +209,20 @@ public abstract class Spatial {
 		}
 	}
 	
+	/**
+	 * @return the world bound
+	 */
 	public AABBox getWorldBound() {
 		return worldBound;
 	}
 	
+	/**
+	 * Check for intersections between this spatial and
+	 * a ray. It must be passed PickResult where the results
+	 * will end up.
+	 * @param ray ray to test against
+	 * @param result contains the results when the method returns
+	 */
 	public void calculatePick(Ray ray, PickResult result) {
 		if(result == null) {
 			Log.w(TAG, "PickResult is null in "+name);
@@ -227,6 +237,10 @@ public abstract class Spatial {
 		}
 	}
 	
+	/**
+	 * Add an animation controller to this spatial
+	 * @param anim animation controller to add
+	 */
 	public void addController(KeyFrameAnimation anim) {
 		if(animations == null) {
 			animations = new ArrayList<KeyFrameAnimation>();
@@ -235,18 +249,32 @@ public abstract class Spatial {
 		animations.add(anim);
 	}
 	
+	/**
+	 * Removes all animation controllers from this spatial
+	 */
 	public void clearControllers() {
 		animations.clear();
 	}
 	
+	/**
+	 * Remove a specific animation controller
+	 * @param anim animation controller to remove
+	 */
 	public void removeController(KeyFrameAnimation anim) {
 		animations.remove(anim);
 	}
 	
+	/**
+	 * @return the parent node of this spatial
+	 */
 	public Node getParent() {
 		return parent;
 	}
 	
+	/**
+	 * Updates the animation controllers of this spatial
+	 * @param tpf time in milliseconds since last update
+	 */
 	public void update(long tpf) {
 		if(animations != null) {
 			int len = animations.size();
@@ -256,6 +284,9 @@ public abstract class Spatial {
 		}
 	}
 	
+	/**
+	 * Returns the name of this spatial
+	 */
 	public String toString() {
 		return name;
 	}
@@ -302,32 +333,30 @@ public abstract class Spatial {
 	}
 
 	/**
-	 * @param dataObject the dataObject to set
+	 * Set an object that contains application specific information
+	 * about this spatial
+	 * @param data the data object to set
 	 */
-	public void setPieceData(PieceData pieceData) {
-		this.pieceData = pieceData;
+	public void setData(Object data) {
+		this.dataObject = data;
 	}
 
 	/**
-	 * @return the dataObject
+	 * @return the data object
 	 */
-	public PieceData getPieceData() {
-		return pieceData;
-	}
-	
-	public boolean hasPieceData() {
-		return (pieceData != null);
+	public Object getData() {
+		return dataObject;
 	}
 	
 	/**
-	 * @param material material to set or null to unset
+	 * @return true if this object has a data object
+	 */
+	public boolean hasData() {
+		return (dataObject != null);
+	}
+	
+	/**
+	 * @param material material to set or null to clear
 	 */
 	public abstract void setMaterial(Material material);
-
-	/**
-	 * @return
-	 */
-	public boolean isRenderable() {
-		return isRenderable;
-	}
 }

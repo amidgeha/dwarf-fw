@@ -61,13 +61,11 @@ public class TriMesh extends Spatial {
 	
 	public TriMesh(String name) {
 		super(name);
-		isRenderable = true;
 		modelBound = new AABBox();
 	}
 	
 	public TriMesh(String name, FloatBuffer vertices, CharBuffer indices) {
 		super(name);
-		isRenderable = true;
 		if(vertices.limit() % 3 != 0) {
 			Log.e(TAG, "Invalid vertex array length (Found: "
 					+vertices.limit()+", not divisable by 3) in "+name);

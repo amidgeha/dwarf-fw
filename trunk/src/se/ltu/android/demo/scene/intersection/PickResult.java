@@ -1,36 +1,50 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.scene.intersection;
 
-import java.util.TreeMap;
-
 import se.ltu.android.demo.scene.Spatial;
 
 /**
+ * Contains the result from testing ray intersections against a scenes elements.<br><br>
+ * <bold>Note:</bold>Currently it only holds the closest intersecting spatial since there
+ * was no need for more at the time.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
-// TODO probable memory hog...
 public class PickResult {
-	TreeMap<Float, Spatial> map;
-	
-	public PickResult() {
-		map = new TreeMap<Float, Spatial>();
-	}
+	Spatial spat;
+	float dist;
 
+	/**
+	 * Add an intersecting spatial to the result
+	 * @param spatial intersecting spatial
+	 * @param distance distance to the intersection point
+	 */
 	public void add(Spatial spatial, float distance) {
-		map.put(distance, spatial);
+		if(spat == null || distance < this.dist) {
+			this.spat = spatial;
+			this.dist = distance;
+		}
 	}
 	
-	public Spatial getFirst() {
-		return map.get(map.firstKey());
+	/**
+	 * @return the closest spatial
+	 */
+	public Spatial getClosest() {
+		return spat;
 	}
-
-	public int size() {
-		return map.size();
+	
+	/**
+	 * @return true if there is at least one result
+	 */
+	public boolean hasResult() {
+		return spat != null;
 	}
 	
 	public String toString() {
-		return map.toString();
+		if(spat != null) {
+			return "s: "+spat.toString() + ", d: "+dist;
+		}
+		return "empty";
 	}
 }

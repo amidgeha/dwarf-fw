@@ -9,6 +9,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 
 /**
+ * Our application specific implementation of a GLSurfaceView. It holds the renderer
+ * and it listens to all input and sensor events spawned by the underlying OS.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
@@ -64,6 +66,7 @@ class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 		}
 	}
 	
+	// See the class documentation for more types of supported gestures.
 	private class DemoGestureDetector extends GestureDetector.SimpleOnGestureListener {
 
 		/*

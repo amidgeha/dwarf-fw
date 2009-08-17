@@ -4,6 +4,7 @@ package se.ltu.android.demo.scene.state;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
+ * Material for geometries in the scene
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
@@ -307,10 +308,14 @@ public class Material {
 		useColorMaterial = b;
 	}
 	
+	/**
+	 * @return true if this material uses vertex colors
+	 */
 	public boolean usesColorMaterial() {
 		return useColorMaterial;
 	}
 	
+	// maybe not so clever
 	private static boolean sameColor(float[] c1, float[] c2) {
 		if(c1 == c2) {
 			return true;

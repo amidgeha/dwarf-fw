@@ -6,6 +6,8 @@ import java.security.InvalidParameterException;
 import android.util.Log;
 
 /**
+ * A key frame consists of a transformation and a point in time.
+ * It's the building stone of a key frame animation path.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
@@ -36,7 +38,7 @@ public class KeyFrame implements Comparable<KeyFrame> {
 	
 	/**
 	 * Compares this frame with another frame based on the
-	 * time set for each frame.
+	 * time set for each frame. The transformations are not tested.
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
@@ -70,22 +72,42 @@ public class KeyFrame implements Comparable<KeyFrame> {
 		return true;
 	}
 
+	/**
+	 * @return the rotation
+	 */
 	public float[] getRotation() {
 		return rotation;
 	}
 	
+	/**
+	 * return the scale
+	 * @return
+	 */
 	public float[] getScale() {
 		return scale;
 	}
 	
+	/**
+	 * @return the time when this key frame should occur
+	 */
 	public long getTime() {
 		return time;
 	}
 	
+	/**
+	 * @return return the translation
+	 */
 	public float[] getTranslation() {
 		return translation;
 	}
 	
+	/**
+	 * Set the rotation specified by an angle and an axis of rotation
+	 * @param angle angle in degrees
+	 * @param x axis of rotation x coordinate
+	 * @param y axis of rotation y coordinate
+	 * @param z axis of rotation z coordinate
+	 */
 	public void setRotation(float angle, float x, float y, float z) {
 		if(rotation == null) {
 			rotation = new float[4];
@@ -96,6 +118,10 @@ public class KeyFrame implements Comparable<KeyFrame> {
 		rotation[3] = z;
 	}
 	
+	/**
+	 * Set the rotation specified by an angle and an axis of rotation
+	 * @param rotation4f rotation to set
+	 */
 	public void setRotation(float[] rotation4f) {
 		if(rotation4f == null) {
 			rotation = null;
@@ -114,6 +140,12 @@ public class KeyFrame implements Comparable<KeyFrame> {
 		rotation[3] = rotation4f[3];
 	}
 	
+	/**
+	 * Set the scale
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
 	public void setScale(float x, float y, float z) {
 		if(scale == null) {
 			scale = new float[3];
@@ -123,6 +155,10 @@ public class KeyFrame implements Comparable<KeyFrame> {
 		scale[2] = z;
 	}
 	
+	/**
+	 * Set the scale
+	 * @param scale3f scale to set
+	 */
 	public void setScale(float[] scale3f) {
 		if(scale3f == null) {
 			scale = null;
@@ -140,6 +176,12 @@ public class KeyFrame implements Comparable<KeyFrame> {
 		scale[2] = scale3f[2];
 	}
 	
+	/**
+	 * Set the translation
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @param z z coordinate
+	 */
 	public void setTranslation(float x, float y, float z) {
 		if(translation == null) {
 			translation = new float[3];
@@ -149,6 +191,10 @@ public class KeyFrame implements Comparable<KeyFrame> {
 		translation[2] = z;
 	}
 	
+	/**
+	 * Set the translation
+	 * @param trans3f translation to set
+	 */
 	public void setTranslation(float[] trans3f) {
 		if(trans3f == null) {
 			translation = null;
@@ -164,12 +210,5 @@ public class KeyFrame implements Comparable<KeyFrame> {
 		translation[0] = trans3f[0];
 		translation[1] = trans3f[1];
 		translation[2] = trans3f[2];
-	}
-
-	/**
-	 * 
-	 */
-	public void initialize() {
-		
 	}
 }

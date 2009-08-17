@@ -14,6 +14,11 @@ import se.ltu.android.demo.scene.intersection.AABBox;
 public class PickBox extends MetaLeaf {
 	AABBox modelBound;
 	
+	/**
+	 * Creates a new instance with the given name and the given bounding volume
+	 * @param name name of the instance
+	 * @param bound custom bounding volume
+	 */
 	public PickBox(String name, AABBox bound) {
 		super(name);
 		modelBound = bound;
@@ -36,6 +41,9 @@ public class PickBox extends MetaLeaf {
 	public void updateModelBound() {
 	}
 
+	/**
+	 * Updates the world bound based on the model bound set for this object.
+	 */
 	@Override
 	public void updateWorldBound(boolean propagate) {
 		worldBound.transform(transM, modelBound);

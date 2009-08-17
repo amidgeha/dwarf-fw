@@ -10,6 +10,8 @@ import se.ltu.android.demo.scene.camera.Camera;
 import android.util.Log;
 
 /**
+ * Our application specific implementation of GLSurfaceView.Renderer. It holds
+ * the GL-context and does nothing but
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
@@ -31,6 +33,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 		camera = new Camera();	// need a default one if one is not set for us
 	}
 
+	@Override
 	public void surfaceCreated(GL10 gl) {
 		// Disable default features to increase performance
 		gl.glDisable(GL10.GL_DITHER);
@@ -49,7 +52,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         
         if(scene != null) {
         	if(use_vbos) {
-    			// FIXME messy...
+    			// TODO messy...
     			scene.forgetHardwareBuffers();
     			scene.generateHardwareBuffers(gl);
     		}
@@ -57,6 +60,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         
     }
 
+	@Override
     public void sizeChanged(GL10 gl, int w, int h) {   	
     	gl.glViewport(0, 0, w, h);
     	Camera.setPerspective(FOVY, w, h, ZNEAR, ZFAR);
@@ -64,12 +68,14 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         gl.glLoadMatrixf(Camera.getProjectionM(), 0);
     }
     
+	@Override
     public void shutdown(GL10 gl) {
 		if (scene != null && use_vbos) {
 			scene.freeHardwareBuffers(gl);
         }
     }
 
+	@Override
 	public void drawFrame(GL10 gl) {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         
@@ -89,27 +95,26 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     		}
         	scene.draw(gl);
         }
-        long now = System.currentTimeMillis();
-        if(now - lastFrame >= 1000l) {
-            Log.d(TAG, fps + " fps");
-            fps = 0;
-            lastFrame = now;
-        } else {
-        	fps++;
-        }
+        //printFPS();
     }
 
+	/**
+	 * Set the scene to render
+	 * @param scene a node representing the scene
+	 */
 	public void setScene(Node scene) {
 		this.scene = scene;
 	}
 	
+	/**
+	 * Tell the renderer to use Vertex Buffer Objects instead
+	 * of java.nio.Buffers.
+	 * @param value true if we want to use VBOs
+	 */
 	public void useVBOs(boolean value) {
 		use_vbos = value;
 	}
 
-	/*
-	 * @see se.ltu.android.demo.GLSurfaceView.Renderer#getConfigSpec()
-	 */
 	@Override
 	public int[] getConfigSpec() {
 		// currently, we need a depth buffer but no alpha channel
@@ -121,11 +126,25 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 	}
 
 	/**
-	 * @param camera
+	 * Set the camera of the camera
+	 * @param camera Camera to use
 	 */
 	public void setCamera(Camera camera) {
 		synchronized(camera) {
 			this.camera = camera;
 		}
+	}
+	
+	// a rough FPS counter, if called in drawFrame().
+	@SuppressWarnings("unused")
+	private void printFPS() {
+		long now = System.currentTimeMillis();
+        if(now - lastFrame >= 1000l) {
+            Log.d(TAG, fps + " fps");
+            fps = 0;
+            lastFrame = now;
+        } else {
+        	fps++;
+        }
 	}
 }
