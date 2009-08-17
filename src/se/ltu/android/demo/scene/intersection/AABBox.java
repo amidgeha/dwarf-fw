@@ -7,7 +7,7 @@ import android.util.Log;
  * An Axis-Aligned Bounding Box that is defined by a minimum and a maximum
  * point.
  * 
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
@@ -63,7 +63,8 @@ public class AABBox {
 	 * Apply a transformation matrix on another box and set the result
 	 * on this box. This box current values will be overwritten while the
 	 * other box will not be touched.
-	 * @param mat column-major transformation matrix to apply
+	 * @param matrix column-major transformation matrix to apply
+         * @param other other bounding box to transform values from
 	 */
 	public void transform(float[] matrix, AABBox other) {
 		if(matrix.length != 16) {

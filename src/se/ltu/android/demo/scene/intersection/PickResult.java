@@ -7,7 +7,7 @@ import se.ltu.android.demo.scene.Spatial;
  * Contains the result from testing ray intersections against a scenes elements.<br><br>
  * <bold>Note:</bold>Currently it only holds the closest intersecting spatial since there
  * was no need for more at the time.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

@@ -9,7 +9,7 @@ import java.nio.IntBuffer;
 
 /**
  * An utility class for java.nio.Buffers.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
@@ -57,7 +57,7 @@ public abstract class BufferUtils {
 
 	/**
 	 * Converts a float buffer to a fixed point int buffer
-	 * @param vertices a FloatBuffer
+	 * @param floatBuffer a FloatBuffer
 	 * @return an IntBuffer containing fixed points
 	 */
 	public static IntBuffer toFixedBuffer(FloatBuffer floatBuffer) {

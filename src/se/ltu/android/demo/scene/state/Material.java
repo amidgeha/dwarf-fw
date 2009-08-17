@@ -5,7 +5,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Material for geometries in the scene
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

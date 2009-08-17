@@ -19,7 +19,8 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 /**
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * A basic geometrical object that is drawn with triangles.
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
@@ -58,12 +59,22 @@ public class TriMesh extends Spatial {
 	private int mTexCoordsBufferIndex;
 	private int mIndexCount;
 	private Material material;
-	
+
+        /**
+         * Creates a new empty instance
+         * @param name name of the object, for identifying purposes
+         */
 	public TriMesh(String name) {
 		super(name);
 		modelBound = new AABBox();
 	}
-	
+
+        /**
+         * Creates a new instance with the supplied vertices and indices
+         * @param name name of the object, for identifying purposes
+         * @param vertices vertices to set
+         * @param indices indices to set
+         */
 	public TriMesh(String name, FloatBuffer vertices, CharBuffer indices) {
 		super(name);
 		if(vertices.limit() % 3 != 0) {
@@ -91,8 +102,9 @@ public class TriMesh extends Spatial {
 	/**
 	 * Creates a clone of this mesh. The clone shares vertices, indices etc
 	 * with the original but the buffers are write protected.
-	 * If you change the original TriMesh's buffers, those changes
-	 * will be visible in the clone.
+	 * If you change the <i>elements</i> of the original TriMesh's buffers, those changes
+	 * will be visible in the clone. The result is <i>undefined</i> if you create new
+         * buffers on the original mesh.
 	 * @param name name of the clone
 	 * @return the cloned TriMesh
 	 */
@@ -221,9 +233,7 @@ public class TriMesh extends Spatial {
 	}
 	
 	/**
-	 * 
-	 * @param colorArray
-	 * @return
+	 * @param colorArray colors to set
 	 */
 	public void setColors(byte[] colorArray) {
 		int size = colorArray.length;
@@ -239,7 +249,11 @@ public class TriMesh extends Spatial {
 		colors.put(colorArray);
 		return;
 	}
-	
+
+        /**
+         * Set the OpenGL draw mode of this mesh.
+         * @param mode an integer defining the mode (see TriMesh.MODE*).
+         */
 	public void setDrawMode(int mode) {
 		if(mode != MODE_TRIANGLE_FAN ||
 		   mode != MODE_TRIANGLE_STRIP ||
@@ -249,7 +263,10 @@ public class TriMesh extends Spatial {
 		}
 		drawMode = mode;
 	}
-	
+
+        /**
+         * @param indexArray indices to set
+         */
 	public void setIndices(char[] indexArray) {
 		int size = indexArray.length;
 		if(indices == null || indices.capacity() != size) {
@@ -270,9 +287,7 @@ public class TriMesh extends Spatial {
 	}
 	
 	/**
-	 * 
-	 * @param normals
-	 * @return
+	 * @param normalArray normals to set
 	 */
 	public void setNormals(float[] normalArray) {
 		int size = normalArray.length;
@@ -288,15 +303,17 @@ public class TriMesh extends Spatial {
 		normals.put(normalArray);
 		return;
 	}
-	
+
+        /**
+         * @param normals normals to set
+         */
 	public void setNormals(FloatBuffer normals) {
 		this.normals = normals;
 	}
 	
 	/**
-	 * 
-	 * @param color4f
-	 * @return
+	 * Set the color for each vertex to the supplied color
+	 * @param color4f color to set as floats
 	 */
 	public void setSolidColor(float[] color4f) {
 		int size = color4f.length;
@@ -315,8 +332,8 @@ public class TriMesh extends Spatial {
 	}
 	
 	/**
-	 * 
-	 * @param color4b array with RGBA components as unsigned bytes 
+         * Set the color for each vertex to the supplied color
+	 * @param color4b color to set as unsigned bytes
 	 */
 	public void setSolidColor(byte[] color4b) {
 		int size = color4b.length;
@@ -336,9 +353,7 @@ public class TriMesh extends Spatial {
 	}
 
 	/**
-	 * 
-	 * @param texcoords
-	 * @return
+	 * @param texcoordsArray texture coordinates to set
 	 */
 	public void setTexCoords(float[] texcoordsArray) {
 		int size = texcoordsArray.length;
@@ -353,15 +368,16 @@ public class TriMesh extends Spatial {
 		texcoords.clear();
 		texcoords.put(texcoordsArray);
 	}
-	
+
+        /**
+         * @param texcoords texture coordinates to set
+         */
 	public void setTexCoords(FloatBuffer texcoords) {
 		this.texcoords = texcoords;
 	}
 	
 	/**
-	 * 
-	 * @param normals
-	 * @return
+	 * @param vertexArray vertices to set
 	 */
 	public void setVertices(float[] vertexArray) {
 		int size = vertexArray.length;
@@ -393,7 +409,10 @@ public class TriMesh extends Spatial {
 		}
 		return null;
 	}
-	
+
+        /**
+         * @return indices
+         */
 	public CharBuffer getIndices() {
 		if(indices != null) {
 			return indices.asReadOnlyBuffer();
@@ -463,7 +482,7 @@ public class TriMesh extends Spatial {
 	}
 	
 	@Override
-    public void forgetHardwareBuffers() {
+        public void forgetHardwareBuffers() {
 		if(cloneTarget != null) {
 			cloneTarget.forgetHardwareBuffers();
 			return;
@@ -612,10 +631,10 @@ public class TriMesh extends Spatial {
 		return world_vectors;
 	}
 	
-	/**
+    /**
      * Writes the TriMesh's vertex data to a stream 
-     * @param s
-	 * @throws IOException 
+     * @param s stream to write to
+     * @throws IOException
      */
     public void exportModel(DataOutputStream s) throws IOException {
     	int len;
@@ -686,8 +705,8 @@ public class TriMesh extends Spatial {
 
     /**
      * Reads the model content of the given stream and set
-     * the read vertex data on this TriMesh.
-     * @param s
+     * the read data on this TriMesh.
+     * @param s stream to read from
      * @throws IOException
      */
     public void importModel(DataInputStream s) throws IOException {
@@ -757,14 +776,14 @@ public class TriMesh extends Spatial {
         }
     }
 
-	/* (non-Javadoc)
-	 * @see se.ltu.android.demo.scene.Spatial#setMaterial(se.ltu.android.demo.light.Material)
-	 */
 	@Override
 	public void setMaterial(Material material) {
 		this.material = material;
 	}
-	
+
+        /**
+         * @return the material set for this object
+         */
 	public Material getMaterial() {
 		return material;
 	}

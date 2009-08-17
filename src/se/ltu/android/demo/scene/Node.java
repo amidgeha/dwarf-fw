@@ -16,7 +16,7 @@ import se.ltu.android.demo.scene.state.Material;
  * A spatial that supports any number of children attached to it. Most of
  * Spatials methods are implemented so that they affect this object and then
  * its children.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
@@ -151,7 +151,7 @@ public class Node extends Spatial {
 	 * Updates the world bound for this node based on the
 	 * world bound of the calling child and propagate the changes up 
 	 * to the root
-	 * @param caller the spatial which world bound has changed 
+	 * @param child the spatial which world bound has changed
 	 */
 	protected void updateWorldBound(Spatial child) {
 		AABBox cBound = child.getWorldBound();

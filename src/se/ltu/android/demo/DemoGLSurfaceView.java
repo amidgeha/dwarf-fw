@@ -11,7 +11,7 @@ import android.view.MotionEvent;
 /**
  * Our application specific implementation of a GLSurfaceView. It holds the renderer
  * and it listens to all input and sensor events spawned by the underlying OS.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

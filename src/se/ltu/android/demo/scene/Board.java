@@ -11,7 +11,7 @@ import se.ltu.android.demo.util.BufferUtils;
 
 /**
  * An application specific extension of a Node representing a chess board.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

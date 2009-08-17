@@ -5,7 +5,7 @@ package se.ltu.android.demo.scene;
  * An application specific data object to be set on a spatial's setData-method.
  * This object holds information about chess pieces placement on the board and
  * the color of the piece.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

@@ -22,7 +22,7 @@ import se.ltu.android.demo.scene.intersection.AABBox;
  * Since this model loader is quite slow and memory intensive, consider saving the resulting
  * TriMesh to a binary format by using the export method.
  * 
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

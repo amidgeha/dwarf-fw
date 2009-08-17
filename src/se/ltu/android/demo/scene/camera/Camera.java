@@ -7,7 +7,7 @@ import android.opengl.Matrix;
 /**
  * A class representing a camera. It's an abstract representation of
  * anything needed to create an OpenGL view.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
@@ -110,7 +110,7 @@ public class Camera {
 	 * Sets the cameras rotation matrix. This is similar
 	 * to setting the model view matrix but it keeps the
 	 * cameras current position.
-	 * @param m rotation matrix to set
+	 * @param rotM rotation matrix to set
 	 */
 	public void setRotationM(float[] rotM) {
 		synchronized(model) {

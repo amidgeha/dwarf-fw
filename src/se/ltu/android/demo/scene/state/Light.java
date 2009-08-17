@@ -8,7 +8,7 @@ import android.util.Log;
 /**
  * A basic light source. One could easily create subclasses of this
  * one to control the behavior of directional, point and spot lights.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

@@ -12,7 +12,7 @@ import android.util.Log;
 /**
  * Our application specific implementation of GLSurfaceView.Renderer. It holds
  * the GL-context and does nothing but
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

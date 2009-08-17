@@ -6,7 +6,7 @@ import javax.microedition.khronos.opengles.GL10;
 import se.ltu.android.demo.scene.state.Light;
 
 /**
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
