@@ -25,7 +25,7 @@ import android.util.Log;
  * @lastmodified $Date$
  */
 public class TriMesh extends Spatial {
-	public static final String TAG = "TriMesh";
+	private static final String TAG = "TriMesh";
 	public static final int MODE_TRIANGLES = GL10.GL_TRIANGLES;
 	public static final int MODE_TRIANGLE_STRIP = GL10.GL_TRIANGLE_STRIP;
 	public static final int MODE_TRIANGLE_FAN = GL10.GL_TRIANGLE_FAN;
