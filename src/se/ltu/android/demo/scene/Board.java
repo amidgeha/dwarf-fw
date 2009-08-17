@@ -5,21 +5,18 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 
-import android.util.Log;
-
 import se.ltu.android.demo.scene.intersection.AABBox;
 import se.ltu.android.demo.scene.shapes.Box;
 import se.ltu.android.demo.util.BufferUtils;
 
 /**
+ * An application specific extension of a Node representing a chess board.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
 public class Board extends Node {
-	/**
-	 * @param name
-	 */
+	
 	public Board(String name) {
 		super(name);
 		//pickBoxes = new PickBox[64];

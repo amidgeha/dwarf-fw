@@ -25,13 +25,13 @@ public class MPMovingAverageFilter {
 	private int nElements = 1;
 	private boolean passthrough = true;
 	private float[][] lastResult;
-	private int steadyPass = 0;
 	private float[][][] sampleHistory;
 	private int iSamp = 0;
 	private int iSampNext = 0;
 	private int iLastPassResult = 0;
 	private long lastTime = 0;
 	private double divValue = 1;
+	private float mulValue = 1;
 
 	/**
 	 * Creates a new filter with a set amount of samples and passes.
@@ -62,6 +62,16 @@ public class MPMovingAverageFilter {
 		// create arrays
 		sampleHistory = new float[nPasses][nElements][nSamples];
 		lastResult = new float[nPasses][nElements];
+		
+		/*
+		 * Initiates the filter just as if you had added zeros 
+		 * until all passes have sampling history.
+		 */
+		iLastPassResult = nPasses-1;
+		divValue = Math.pow(nSamples, iLastPassResult+1);
+		if(divValue > 0) {
+			mulValue  = (float) (1.0/divValue);
+		}
 	}
 
 	/**
@@ -89,18 +99,6 @@ public class MPMovingAverageFilter {
 	 */
 	public MPMovingAverageFilter(int nSamples) {
 		this(nSamples, 1);
-	}
-	
-	/**
-	 * Initiates the filter just as if you had added zeros 
-	 * until all passes have sampling history.
-	 * <b>Hint</b>, this is <i>way</i> faster than actually adding
-	 * those zeroes by hand.
-	 */
-	public void initialize() {
-		iLastPassResult = nPasses-1;
-		divValue = Math.pow(nSamples, iLastPassResult+1);
-		steadyPass = nPasses;
 	}
 	
 	/**
@@ -161,8 +159,8 @@ public class MPMovingAverageFilter {
 		/*
 		 * Since samples can come whenever "they want", we want to
 		 * fill the void between two samples...
-		 * This WILL result in a rounding error! Too lazy to do a
-		 * good weighted average solution :P
+		 * This WILL result in a rounding error so be careful if you
+		 * need very accurate results. 
 		 */
 		int nAdds;
 		if(lastTime == 0) {
@@ -180,51 +178,19 @@ public class MPMovingAverageFilter {
 	private void _add(float[] sample) {
 		float toAdd;
 		for (int iPass = 0; iPass < nPasses; iPass++) {
-			if (iPass >= steadyPass) {
-				// we need to collect samples...
-				if (iPass == steadyPass) {
-					// ...but don't unless the previous pass is stable (or it's the first pass)
-					for (int iElem = 0; iElem < nElements; iElem++) {
-						// if first pass, add sample.
-						// otherwise, add previous pass result
-						toAdd = iPass == 0 ? sample[iElem] : lastResult[iPass - 1][iElem];
-						lastResult[iPass][iElem] += toAdd;
-						iLastPassResult = iPass;
-						// populate sample history
-						sampleHistory[iPass][iElem][iSamp] = toAdd;
-					}
-				}
+			for (int iElem = 0; iElem < nElements; iElem++) {
+				// if first pass, add sample. otherwise, add previous pass result
+				toAdd = iPass == 0 ? sample[iElem] : lastResult[iPass - 1][iElem];
 				
-			} else {
-				// here we have enough samples to do the regular
-				// moving average algorithm for this pass
-				for (int iElem = 0; iElem < nElements; iElem++) {
-					// if first pass, add sample. otherwise, add previous pass
-					// result
-					toAdd = iPass == 0 ? sample[iElem] : lastResult[iPass - 1][iElem];
-
-					// add new value and remove the first
-					lastResult[iPass][iElem] += toAdd - sampleHistory[iPass][iElem][iSampNext];
-
-					// write over sample history
-					sampleHistory[iPass][iElem][iSamp] = toAdd;
-				}
+				// add new value and remove the first
+				lastResult[iPass][iElem] += toAdd - sampleHistory[iPass][iElem][iSampNext];
+				
+				// write over sample history
+				sampleHistory[iPass][iElem][iSamp] = toAdd;
 			}
 		}
 		iSamp = nextIndex(iSamp);
 		iSampNext = nextIndex(iSampNext);
-		if(steadyPass < nPasses && iSamp == 0) {
-			
-			// with iSamp as 0, we have written a full sample history for one
-			// pass. We can now mark that pass as "complete" and start
-			// gathering samples for another pass
-			steadyPass++;
-			
-			if(steadyPass <= nPasses) {
-				// update divValue during pass changes
-				divValue = Math.pow(nSamples, iLastPassResult+1);
-			}
-		}
 	}
 
 	/**
@@ -245,12 +211,8 @@ public class MPMovingAverageFilter {
 				result[iElem] = lastResult[0][iElem];
 			}
 		}
-		// calculate our division while we´re still collecting enough samples
-		if(steadyPass < nPasses && iSamp != 0) {
-			divValue = Math.pow(nSamples, iLastPassResult+1) * (iSamp)/(double)nSamples;
-		}
 		for (int iElem = 0; iElem < nElements; iElem++) {
-			result[iElem] = (float) (lastResult[iLastPassResult][iElem] / divValue);
+			result[iElem] = (float) (lastResult[iLastPassResult][iElem] * mulValue);
 		}
 	}
 

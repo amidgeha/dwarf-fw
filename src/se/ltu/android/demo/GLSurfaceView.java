@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 // This file was lifted from the APIDemos sample.  See:
 // http://developer.android.com/guide/samples/ApiDemos/src/com/example/android/apis/graphics/index.html
+
 package se.ltu.android.demo;
 
 import java.util.concurrent.Semaphore;
@@ -39,10 +39,14 @@ import android.view.SurfaceView;
  * An implementation of SurfaceView that uses the dedicated surface for
  * displaying an OpenGL animation.  This allows the animation to run in a
  * separate thread, without requiring that it be driven by the update mechanism
- * of the view hierarchy.
- *
+ * of the view hierarchy.<br><br>
+ * 
  * The application-specific rendering code is delegated to a GLView.Renderer
- * instance.
+ * instance.<br><br>
+ * 
+ * Instead of using GLSurfaceView that comes with the SDK, this class is based of: <br>
+ * http://code.google.com/p/apps-for-android/source/browse/trunk/SpriteMethodTest/src/com/android/spritemethodtest/GLSurfaceView.java?r=153<br>
+ * This was necessary in order to make VBO's work.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
@@ -75,6 +79,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         mGLWrapper = glWrapper;
     }
 
+    /**
+     * Set the renderer. Also wraps the renderer in a thread and
+     * starts the thread.
+     * @param renderer Renderer to set
+     */
     public void setRenderer(Renderer renderer) {
         mGLThread = new GLThread(renderer);
         mGLThread.start();

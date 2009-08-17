@@ -5,11 +5,16 @@ import se.ltu.android.demo.scene.intersection.Ray;
 import android.opengl.Matrix;
 
 /**
+ * A class representing a camera. It's an abstract representation of
+ * anything needed to create an OpenGL view.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
 public class Camera {
+	/**
+	 * Constant for multiplying angular degrees to radians. 
+	 */
 	public static final float DEG_TO_RAD = 0.01745329238474369f;
 	
 	// Projection matrix.. keep static so all instances of camera
@@ -84,14 +89,15 @@ public class Camera {
 	}
 	
 	/**
-	 * 
-	 * @param result
-	 * @return 
+	 * @return the projection matrix 
 	 */
 	public static float[] getProjectionM() {
 		return project;
 	}
 	
+	/**
+	 * @param m the model-view matrix to set
+	 */
 	public void setModelM(float[] m) {
 		synchronized(model) {
 			for(int i = 0; i < 16; i++) {
@@ -102,17 +108,22 @@ public class Camera {
 	
 	/**
 	 * Sets the cameras rotation matrix. This is similar
-	 * to setModelM but it keeps the cameras current position.
+	 * to setting the model view matrix but it keeps the
+	 * cameras current position.
+	 * @param m rotation matrix to set
 	 */
-	public void setRotationM(float[] m) {
+	public void setRotationM(float[] rotM) {
 		synchronized(model) {
 			for(int i = 0; i < 16; i++) {
-				model[i] = m[i];
+				model[i] = rotM[i];
 			}
 			Matrix.translateM(model, 0, -position[0], -position[1], -position[2]);
 		}
 	}
 	
+	/**
+	 * @return the model view matrix
+	 */
 	public float[] getModelM() {
 		synchronized(model) {
 			return model;
@@ -250,6 +261,9 @@ public class Camera {
 		}
 	}
 	
+	/**
+	 * @return the current position
+	 */
 	public float[] getPosition() {
 		return position;
 	}
@@ -289,7 +303,7 @@ public class Camera {
 	 * the current projection matrix and model view matrix.
 	 * 
 	 * The screen coordinates are expected to have (0,0) at the upper left 
-	 * part of the screen and the y-axis is reversed compared to the OpenGL y-axis. 
+	 * corner of the screen and the y-axis is reversed compared to the OpenGL y-axis. 
 	 * @param pickX screen x coordinate
 	 * @param pickY screen y coordinate
 	 */
@@ -298,8 +312,6 @@ public class Camera {
     	// -1 <= x <= 1 and -1 <= y <= 1
     	float unit_x = (pickX - half_width)/half_width;
     	float unit_y = ((height - pickY) - half_height)/half_height;
-    	
-    	//Log.d(TAG, "Pick: ("+pickX+", "+pickY+") - Unit: ("+unit_x+", "+unit_y+")");
 		
 		float[] rayRawPos = {0.0f, 0.0f, 0.0f, 1.0f};
 		float[] rayRawDir = {unit_x * near_height * aspect, unit_y * near_height, -zNear, 0.0f};
@@ -314,8 +326,6 @@ public class Camera {
 		Matrix.multiplyMV(rayPos, 0, invModel, 0, rayRawPos, 0);
 		Matrix.multiplyMV(rayDir, 0, invModel, 0, rayRawDir, 0);
 
-		//Log.d(TAG, tmp="  Raw Ray pos: ("+rayRawPos[0]+", "+rayRawPos[1]+", "+rayRawPos[2]+") - dir: ("+rayRawDir[0]+", "+rayRawDir[1]+", "+rayRawDir[2]+")");
-		//Log.d(TAG, tmp="World Ray pos: ("+rayPos[0]+", "+rayPos[1]+", "+rayPos[2]+") - dir: ("+rayDir[0]+", "+rayDir[1]+", "+rayDir[2]+")");
 		return new Ray(rayPos[0], rayPos[1], rayPos[2], rayDir[0], rayDir[1], rayDir[2]);
 	}
 }

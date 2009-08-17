@@ -9,6 +9,14 @@ import android.util.Log;
 import android.view.animation.Interpolator;
 
 /**
+ * A key frame-based animation path. A key frame is nothing more than
+ * a transformation and a point in time. Any spatial affected by this
+ * animation will move between the set transformation at the specified
+ * moments in time.<br><br>
+ * 
+ * <strong>Note:</strong> currently it only support translations. While
+ * implementing scaling is easy, the scene should support quaternions
+ * to effectively interpolate the rotation between two key frames.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
@@ -86,6 +94,7 @@ public class KeyFrameAnimation {
 	/**
 	 * Prepares the animation to be run. Any missing information in each frame
 	 * is filled in and creates a first frame.
+	 * @param spatial spatial to fill in missing information from
 	 */
 	public void prepare(Spatial spatial) {
 		if (frames.size() == 0) {
@@ -133,7 +142,7 @@ public class KeyFrameAnimation {
 	}
 
 	/**
-	 * Resets the animation back to the first frame and starts the animation.
+	 * Resets the animation back to the first frame and (re)starts the animation.
 	 */
 	public void reset() {
 		curTime = 0;
@@ -147,10 +156,10 @@ public class KeyFrameAnimation {
 
 	/**
 	 * Updates the animation based on the current time per frame This method is
-	 * called from a spatial
+	 * called from a spatial.
 	 * 
-	 * @param tpf
-	 *            current time per frame
+	 * @param tpf current time per frame
+	 * @param caller spatial that called the update
 	 */
 	public void update(long tpf, Spatial caller) {
 		if (isRunning) {
@@ -188,8 +197,9 @@ public class KeyFrameAnimation {
 	}
 
 	/**
-	 * 
-	 * @param ip
+	 * Set the interpolator that will change the behavior between
+	 * any two key frames.
+	 * @param ip interpolator to set
 	 */
 	public void setInterpolator(Interpolator ip) {
 		this.interpolator = ip;
@@ -202,7 +212,7 @@ public class KeyFrameAnimation {
 	private void frameChange(Spatial caller) {
 		if (curTime >= lastFrameTime) {
 			// end of animation
-			// TODO implement some kind of wrapping mechanism?
+			// TODO implement some kind of wrapping mechanism
 			isRunning = false;
 			if(listener != null) {
 				listener.onAnimationEnd(this, caller);

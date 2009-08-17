@@ -7,11 +7,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.content.res.AssetFileDescriptor;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import se.ltu.android.demo.scene.Board;
-import se.ltu.android.demo.scene.CameraNode;
+import se.ltu.android.demo.scene.CameraLeaf;
 import se.ltu.android.demo.scene.LightNode;
 import se.ltu.android.demo.scene.Node;
 import se.ltu.android.demo.scene.PieceData;
@@ -30,6 +31,9 @@ import se.ltu.android.demo.sensors.SensorHandler;
 import se.ltu.android.demo.util.ObjLoader;
 
 /**
+ * A thread that updates the world based on input and sensor events. All kind
+ * of game states and logic should be placed here. Very heavy calculations should
+ * still be placed in a separate asynchronous task.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
@@ -66,7 +70,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	// Camera variables
 	private Camera[] camList; 	// list of available cameras
 	private int iCam = 0; 		// camera pointer
-	private CameraNode camNode = new CameraNode("Camera");	//used for animation camera movement
+	private CameraLeaf camLeaf = new CameraLeaf("Camera");	//used for animation camera movement
 	private float[] modelM = new float[16];
 	private int iCamSensor = 0;	// marks which camera that 
 	
@@ -76,6 +80,10 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	private Material lightMatPicked;
 	private Material darkMatPicked;
 
+	/**
+	 * Creates the game thread
+	 * @param glview
+	 */
 	public DemoGameThread(DemoGLSurfaceView glview) {
 		setName("GameThread");
 		mGLView = glview;
@@ -96,6 +104,10 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		camList[3].lookAt(6, 0, 6, 0, 0, -2.9f, 0, 0, 1);
 	}
 
+	/**
+	 * Starts the game loop
+	 */
+	@Override
 	public void run() {
 		mGLView.getRenderer().useVBOs(true);
 		createWorld();
@@ -182,7 +194,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			result = new PickResult();
 			world.calculatePick(pickRay, result);
 		}
-		if (result == null || result.size() < 1) {
+		if (result == null || !result.hasResult()) {
 			return;
 		}
 		if(nTaps == 1) {
@@ -244,8 +256,8 @@ public class DemoGameThread extends Thread implements AnimationListener {
 
 	private void handleSingleTap(PickResult result) {
 		Log.d(TAG, "Single tap");
-		Spatial spatial = result.getFirst();
-		if (spatial.hasPieceData()) {
+		Spatial spatial = result.getClosest();
+		if (spatial.hasData() && (spatial.getData() instanceof PieceData)) {
 			checkPickPiece((TriMesh)spatial);
 			return;
 		} 
@@ -283,12 +295,9 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		}
 	}
 	
-	/**
-	 * @param result
-	 */
 	private void handleDoubleTap(PickResult result) {
 		Log.d(TAG, "Double tap");
-		Spatial spatial = result.getFirst();
+		Spatial spatial = result.getClosest();
 		if (spatial.hasParent() && spatial.getParent().getName().equals("Board")) {
 			// picked a square
 			float[] to = spatial.getLocalTranslation();
@@ -301,8 +310,8 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			
 			// square with no piece, set to go
 			moving_camera = true;
-			camNode.setCamera(camList[iCam]);
-			float[] from = camNode.getLocalTranslation();
+			camLeaf.setCamera(camList[iCam]);
+			float[] from = camLeaf.getLocalTranslation();
 			
 			// create animation
 			KeyFrame frame = new KeyFrame(2000);
@@ -310,7 +319,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			KeyFrameAnimation anim = new KeyFrameAnimation(this);
 			anim.addFrame(frame);
 			anim.setInterpolator(new AccelerateDecelerateInterpolator());
-			camNode.addController(anim);
+			camLeaf.addController(anim);
 		}
 	}
 
@@ -330,11 +339,8 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		selectPick(spatial);
 	}
 
-	/**
-	 * 
-	 */
 	private void unselectPick() {
-		if(pickedMesh.getPieceData().isDark()) {
+		if(((PieceData)pickedMesh.getData()).isDark()) {
 			pickedMesh.setMaterial(darkMat);
 		} else {
 			pickedMesh.setMaterial(lightMat);
@@ -344,17 +350,23 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	
 	private void selectPick(TriMesh spatial) {
 		pickedMesh = spatial;
-		if(pickedMesh.getPieceData().isDark()) {
+		if(((PieceData)pickedMesh.getData()).isDark()) {
 			pickedMesh.setMaterial(darkMatPicked);
 		} else {
 			pickedMesh.setMaterial(lightMatPicked);
 		}
 	}
 
+	/**
+	 * Pauses the game loop
+	 */
 	public void onPause() {
 		isPaused = true;
 	}
 
+	/**
+	 * Resumes the game loop
+	 */
 	public void onResume() {
 		isPaused = false;
 	}
@@ -421,7 +433,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 					.getRowPos(row), -2.8f);
 			pData = new PieceData(col, row);
 			pData.setDark(false);
-			pawn.setPieceData(pData);
+			pawn.setData(pData);
 			pawn.setMaterial(lightMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = pawn;
 			world.attachChild(pawn);
@@ -436,7 +448,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 					.getRowPos(row), -2.8f);
 			pData = new PieceData(col, row);
 			pData.setDark(false);
-			knight.setPieceData(pData);
+			knight.setData(pData);
 			knight.setMaterial(lightMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = knight;
 			world.attachChild(knight);
@@ -451,7 +463,7 @@ public class DemoGameThread extends Thread implements AnimationListener {
 					.getRowPos(row), -2.8f);
 			pData = new PieceData(col, row);
 			pData.setDark(false);
-			king.setPieceData(pData);
+			king.setData(pData);
 			king.setMaterial(lightMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = king;
 			world.attachChild(king);
@@ -461,10 +473,10 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			mesh = pawn.cloneMesh("Cloned pawn");
 			mesh.setLocalTranslation(PieceData.getColPos(col), PieceData
 					.getRowPos(row), -2.8f);
-			mesh.setPieceData(new PieceData(col, row));
+			mesh.setData(new PieceData(col, row));
 			pData = new PieceData(col, row);
 			pData.setDark(true);
-			mesh.setPieceData(pData);
+			mesh.setData(pData);
 			mesh.setMaterial(darkMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = mesh;
 			world.attachChild(mesh);
@@ -474,10 +486,10 @@ public class DemoGameThread extends Thread implements AnimationListener {
 			mesh = mesh.cloneMesh("Cloned knight");
 			mesh.setLocalTranslation(PieceData.getColPos(col), PieceData
 					.getRowPos(row), -2.8f);
-			mesh.setPieceData(new PieceData(col, row));
+			mesh.setData(new PieceData(col, row));
 			pData = new PieceData(col, row);
 			pData.setDark(true);
-			mesh.setPieceData(pData);
+			mesh.setData(pData);
 			mesh.setMaterial(darkMat);
 			board_data[PieceData.getColIndex(col)][PieceData.getRowIndex(row)] = mesh;
 			world.attachChild(mesh);
@@ -499,22 +511,22 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		*/
 
 		world.attachChild(board);
-		world.attachChild(camNode);
+		world.attachChild(camLeaf);
 		world.updateTransform();
 		world.updateWorldBound(false);
 	}
 
 	/**
-	 * @param inputObj
-	 * @param outputMod
-	 * @throws IOException 
+	 * Converts a model from OBJ to our TriMesh's binary format.
+	 * @param inputObj a resource identifier for an OBJ-file (like R.raw.whatever)
+	 * @param outputMod an output file location (like "/sdcard/whatever.mod").
+	 * @throws IOException if there was any error
 	 */
 	@SuppressWarnings("unused")
 	private void convertModel(int inputObj, String outputMod) throws IOException {
 		ObjLoader loader = new ObjLoader();
-        InputStream stream1 = mGLView.getContext().getResources().openRawResource(inputObj);
-        InputStream stream2 = mGLView.getContext().getResources().openRawResource(inputObj);
-		TriMesh tPawn = loader.loadModel("Pawn", stream1, stream2);
+        AssetFileDescriptor fd = mGLView.getContext().getResources().openRawResourceFd(inputObj);
+		TriMesh tPawn = loader.loadModel("Pawn", fd);
 		FileOutputStream fos = new FileOutputStream(outputMod);
 		DataOutputStream dos = new DataOutputStream(fos);
 		tPawn.exportModel(dos);
@@ -555,12 +567,20 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		}
 	}
 
+	/**
+	 * Register a track ball click on this thread.
+	 */
 	public static void onTrackballClick() {
 		synchronized (trackInput) {
 			trackInput[3] = 1;
 		}
 	}
 	
+	/**
+	 * Register a track ball move on this thread
+	 * @param x relative movement x coordinate
+	 * @param y relative movement y coordinate
+	 */
 	public static void onTrackballMove(float x, float y) {
 		synchronized (trackInput) {
 			trackInput[0] += x;
@@ -569,10 +589,13 @@ public class DemoGameThread extends Thread implements AnimationListener {
 		}
 	}
 
+	/**
+	 * Handles the end of an animation
+	 */
 	@Override
 	public void onAnimationEnd(KeyFrameAnimation anim, Spatial spatial) {
 		if(spatial != null) {
-			if(spatial instanceof CameraNode) {
+			if(spatial instanceof CameraLeaf) {
 				// it's a camera
 				moving_camera = false;
 			} else {

@@ -1,36 +1,37 @@
 /* SVN FILE: $Id$ */
 package se.ltu.android.demo.scene;
 
+import android.opengl.Matrix;
 import se.ltu.android.demo.scene.camera.Camera;
 
 /**
+ * A Camera object embedded in a scene element leaf. Changing the leafs spatial
+ * position will also change the Cameras position.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
-public class CameraNode extends MetaLeaf {
+public class CameraLeaf extends MetaLeaf {
 	private Camera cam;
 	
 	/**
-	 * Create a camera node without a Camera to wrap.
+	 * CreCameraLeafra node without a Camera to wrap.
 	 * You must specify the Camera later with <code>setCamera</code>.
 	 * @param name name of the camera
 	 */
-	public CameraNode(String name) {
+	public CameraLeaf(String name) {
 		super(name);
 		setPickable(false);
 	}
-	
-	/**
-	 * Creates a camera node which wraps given camera
+		/** Creates a camera node which wraps given camera
 	 * @param name name of the camera
 	 * @param cam Camera object to wrap
 	 */
-	public CameraNode(String name, Camera cam) {
+	public CameraLeaf(String name, Camera cam) {
 		this(name);
 		this.cam = cam;
 	}
-	
+		
 	@Override
 	public void setLocalTranslation(float x, float y, float z) {
 		if(cam == null) {
@@ -65,6 +66,10 @@ public class CameraNode extends MetaLeaf {
 		this.cam = cam;
 	}
 	
+	/**
+	 * Updates the world transformation matrix for this spatial
+	 * <strong>Note:</strong> this is currently unsupported.
+	 */
 	@Override
 	public void updateTransform() {
 		// TODO The camera should be affected by parents world translation

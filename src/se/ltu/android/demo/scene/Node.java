@@ -13,6 +13,9 @@ import se.ltu.android.demo.scene.intersection.Ray;
 import se.ltu.android.demo.scene.state.Material;
 
 /**
+ * A spatial that supports any number of children attached to it. Most of
+ * Spatials methods are implemented so that they affect this object and then
+ * its children.
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
@@ -37,6 +40,10 @@ public class Node extends Spatial {
 		}
 	}
 
+	/**
+	 * Add a child to this node.
+	 * @param child child to add
+	 */
 	public void attachChild(Spatial child) {
 		synchronized(children) {
 			children.add(child);
@@ -47,6 +54,10 @@ public class Node extends Spatial {
 		child.parent = this;
 	}
 	
+	/**
+	 * Removes a child from this node
+	 * @param child child to remove
+	 */
 	public void detachChild(Spatial child) {
 		synchronized(children) {
 			children.remove(child);
@@ -54,12 +65,18 @@ public class Node extends Spatial {
 		child.parent = null;
 	}
 	
+	/**
+	 * @return true if this node has at least one child
+	 */
 	public boolean hasChildren() {
 		synchronized(children) {
 			return children.size() > 0;
 		}
 	}
 	
+	/**
+	 * @return the list of children attached to this node
+	 */
 	public ArrayList<Spatial> getChildren() {
 		synchronized(children) {
 			return children;
@@ -67,7 +84,7 @@ public class Node extends Spatial {
 	}
 	
 	/**
-	 * Updates the model bound for all leafs to this node.
+	 * Updates the model bound for all children of this node.
 	 */
 	@Override
 	public void updateModelBound() {
@@ -79,6 +96,11 @@ public class Node extends Spatial {
 		}
 	}
 	
+	/**
+	 * Updates the world bound of this node and its children.
+	 * @param propagate set to true if we want to propagate the
+	 * changes up to the root
+	 */
 	@Override
 	public void updateWorldBound(boolean propagate) {
 		synchronized(children) {
@@ -152,7 +174,7 @@ public class Node extends Spatial {
 	}
 	
 	/**
-	 * Updates the world transform for this node its children
+	 * Updates the world transform for this node and its children
 	 */
 	@Override
 	public void updateTransform() {

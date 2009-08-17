@@ -4,6 +4,8 @@ package se.ltu.android.demo.scene.shapes;
 import se.ltu.android.demo.scene.TriMesh;
 
 /**
+ * A quadrilateral.
+ * 
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$

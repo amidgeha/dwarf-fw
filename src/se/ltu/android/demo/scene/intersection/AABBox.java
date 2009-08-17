@@ -100,8 +100,11 @@ public class AABBox {
 		maxZ = newMax[2];
 	}
 	
+	/**
+	 * @return true if this bounding box is set
+	 */
 	public boolean isSet() {
-		return minX == maxX && minY == maxY && minZ == maxZ;
+		return (minX != maxX || minY != maxY || minZ != maxZ);
 	}
 }
 

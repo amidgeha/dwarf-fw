@@ -3,13 +3,13 @@ package se.ltu.android.demo.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import android.content.res.AssetFileDescriptor;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -17,18 +17,14 @@ import se.ltu.android.demo.scene.TriMesh;
 import se.ltu.android.demo.scene.intersection.AABBox;
 
 /**
- * A simple Obj-loader. Currently it only parse vertices and vertex face data.
- * It does not parse texture coordinates, normal data.
- * 
- * This class is <b>not</b> thread-safe
+ * A simple Obj-loader. It parses vertices, UV coordinates, normals and face descriptions.
+ * It currently only works for triangulated faces.<br><br>
+ * Since this model loader is quite slow and memory intensive, consider saving the resulting
+ * TriMesh to a binary format by using the export method.
  * 
  * @author Åke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
- */
-/*
- * The implementation is large and memory consuming. The end result is nice though.
- * To reduce loading time, consider saving your resulting Java object to a binary format instead.
  */
 public class ObjLoader {
 	private final static String TAG = "ObjLoader";
@@ -69,16 +65,14 @@ public class ObjLoader {
 	/**
 	 * Loads a model from an OBJ-file into a new TriMesh
 	 * 
-	 * @param filename
-	 *            absolute or relative path to the OBJ-file
 	 * @param name
 	 *            name of the new TriMesh
+	 * @param fd a file descriptor for the model to be imported
 	 * @return the new TriMesh or null if the file could not be imported
-	 * @throws IOException
+	 * @throws IOException if there was an error loading the model
 	 */
-	public TriMesh loadModel(String name, InputStream stream1,
-			InputStream stream2) throws IOException {
-		BufferedReader in = new BufferedReader(new InputStreamReader(stream1), 8192);
+	public TriMesh loadModel(String name, AssetFileDescriptor fd) throws IOException {
+		BufferedReader in = new BufferedReader(new InputStreamReader(fd.createInputStream()), 8192);
 		TriMesh mesh = null;
 
 		// count occurrences first
@@ -98,7 +92,7 @@ public class ObjLoader {
 
 		// this is the same regardless of the cases below
 		indices = BufferUtils.createCharBuffer(nFaces * nVertsPerFace);
-		in = new BufferedReader(new InputStreamReader(stream2));
+		in = new BufferedReader(new InputStreamReader(fd.createInputStream()), 8192);
 		
 		if (nNormals == 0 && nTexCoords == 0) {
 			// we can directly use faces as indices
@@ -150,8 +144,6 @@ public class ObjLoader {
 				mesh.setTexCoords(texcoords);
 			}
 		}
-		in = new BufferedReader(new InputStreamReader(stream2));
-		// load the model
 
 		// create the TriMesh
 		AABBox bound = new AABBox();

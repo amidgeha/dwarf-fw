@@ -18,12 +18,10 @@ public class LightNode extends Node {
 	 */
 	public LightNode(String name) {
 		super(name);
-		isRenderable = true;
 	}
 	
 	public LightNode(String name, Light light) {
 		super(name);
-		isRenderable = true;
 		this.light = light;
 	}
 
