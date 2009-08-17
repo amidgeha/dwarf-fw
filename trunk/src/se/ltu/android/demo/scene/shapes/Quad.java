@@ -6,7 +6,7 @@ import se.ltu.android.demo.scene.TriMesh;
 /**
  * A quadrilateral.
  * 
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
@@ -26,7 +26,7 @@ public class Quad extends TriMesh {
 	
 	/**
 	 * Constructs a quad with given dimensions
-	 * @name for identifying purposes
+	 * @param name for identifying purposes
 	 * @param width length in x-axis
 	 * @param height length in y-axis
 	 */

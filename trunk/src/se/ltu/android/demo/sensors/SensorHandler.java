@@ -7,7 +7,7 @@ import android.hardware.SensorManager;
  * A class that will handle sensor data in a separate thread. All kinds of
  * signal manipulation should be done here.
  * 
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

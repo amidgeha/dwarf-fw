@@ -10,7 +10,7 @@ import se.ltu.android.demo.scene.state.Material;
  * methods in Spatial. This object cannot be instantiated
  * but is designed to be extended to other types of leafs
  * that do not require rendering.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

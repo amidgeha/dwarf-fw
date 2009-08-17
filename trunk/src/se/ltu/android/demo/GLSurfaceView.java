@@ -47,7 +47,7 @@ import android.view.SurfaceView;
  * Instead of using GLSurfaceView that comes with the SDK, this class is based of: <br>
  * http://code.google.com/p/apps-for-android/source/browse/trunk/SpriteMethodTest/src/com/android/spritemethodtest/GLSurfaceView.java?r=153<br>
  * This was necessary in order to make VBO's work.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

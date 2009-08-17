@@ -7,7 +7,7 @@ import se.ltu.android.demo.scene.camera.Camera;
 /**
  * A Camera object embedded in a scene element leaf. Changing the leafs spatial
  * position will also change the Cameras position.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

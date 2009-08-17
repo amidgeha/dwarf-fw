@@ -8,7 +8,7 @@ import android.util.Log;
 /**
  * A key frame consists of a transformation and a point in time.
  * It's the building stone of a key frame animation path.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
@@ -80,8 +80,7 @@ public class KeyFrame implements Comparable<KeyFrame> {
 	}
 	
 	/**
-	 * return the scale
-	 * @return
+	 * @return the scale
 	 */
 	public float[] getScale() {
 		return scale;
@@ -95,7 +94,7 @@ public class KeyFrame implements Comparable<KeyFrame> {
 	}
 	
 	/**
-	 * @return return the translation
+	 * @return the translation
 	 */
 	public float[] getTranslation() {
 		return translation;

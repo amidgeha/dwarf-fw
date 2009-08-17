@@ -4,7 +4,7 @@ package se.ltu.android.demo.sensors;
 /**
  * A Multiple-Pass (and somewhat weighted) Moving Average Filter.
  * 
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
@@ -136,9 +136,9 @@ public class MPMovingAverageFilter {
 	 * 
 	 * @param sample Sample to add. The elements of this array will be filtered
 	 * individually.
-	 * @param long Time in <b>nanoseconds</b>. Such as those already given from the sensors.
+	 * @param time Time in <b>nanoseconds</b>. Such as those already given from the sensors.
 	 */
-	public void addSamples(float sample[], long time) {
+	public void addSamples(float[] sample, long time) {
 
 		if (sample.length != nElements) {
 			try {

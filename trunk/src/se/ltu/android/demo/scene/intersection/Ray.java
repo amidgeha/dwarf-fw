@@ -3,7 +3,7 @@ package se.ltu.android.demo.scene.intersection;
 
 /**
  * A basic ray with intersection test. 
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

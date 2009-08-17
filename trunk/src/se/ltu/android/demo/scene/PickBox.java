@@ -7,7 +7,7 @@ import se.ltu.android.demo.scene.intersection.AABBox;
  * Represents a bounding box that can be placed anywhere in
  * a scene. As an example, it is good for creating one or more 
  * pickable areas inside a solid mesh.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

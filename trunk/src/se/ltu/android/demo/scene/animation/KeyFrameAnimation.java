@@ -17,7 +17,7 @@ import android.view.animation.Interpolator;
  * <strong>Note:</strong> currently it only support translations. While
  * implementing scaling is easy, the scene should support quaternions
  * to effectively interpolate the rotation between two key frames.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

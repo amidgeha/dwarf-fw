@@ -6,7 +6,7 @@ import se.ltu.android.demo.scene.TriMesh;
 /**
  * A box
  * 
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */

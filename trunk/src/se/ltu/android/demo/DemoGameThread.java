@@ -34,7 +34,7 @@ import se.ltu.android.demo.util.ObjLoader;
  * A thread that updates the world based on input and sensor events. All kind
  * of game states and logic should be placed here. Very heavy calculations should
  * still be placed in a separate asynchronous task.
- * @author Åke Svedin <ake.svedin@gmail.com>
+ * @author Ã…ke Svedin <ake.svedin@gmail.com>
  * @version $Revision$
  * @lastmodified $Date$
  */
