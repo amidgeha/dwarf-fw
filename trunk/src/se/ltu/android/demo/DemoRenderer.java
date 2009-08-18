@@ -57,7 +57,6 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     			scene.generateHardwareBuffers(gl);
     		}
         }
-        
     }
 
 	@Override
@@ -91,7 +90,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         	if(use_vbos) {
         		// creates hardware buffers for objects
         		// that do not already have any
-    			scene.generateHardwareBuffers(gl);
+        		scene.generateHardwareBuffers(gl);
     		}
         	scene.draw(gl);
         }

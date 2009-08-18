@@ -531,8 +531,10 @@ public class TriMesh extends Spatial {
     
     @Override    
     public void generateHardwareBuffers(GL10 gl) {
-    	if(cloneTarget != null && cloneTarget.mVertBufferIndex == 0) {
-    		cloneTarget.generateHardwareBuffers(gl);
+    	if(cloneTarget != null) {
+    		if (cloneTarget.mVertBufferIndex == 0) {
+    			cloneTarget.generateHardwareBuffers(gl);
+    		}
     		mVertBufferIndex = cloneTarget.mVertBufferIndex;
             mIndexBufferIndex = cloneTarget.mIndexBufferIndex;
             mNormalBufferIndex = cloneTarget.mNormalBufferIndex;
