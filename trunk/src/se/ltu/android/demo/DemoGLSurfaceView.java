@@ -19,10 +19,11 @@ public class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListe
 	private DemoRenderer mRenderer;
 	private GestureDetector mGestureDetector;
 
-	public DemoGLSurfaceView(DemoActivity context) {
+	public DemoGLSurfaceView(DemoActivity context, boolean use_vbos) {
 		super(context);
 
 		mRenderer = new DemoRenderer();
+		mRenderer.useVBOs(use_vbos);
 		setRenderer(mRenderer);
 		
 		mGestureDetector = new GestureDetector(context, new DemoGestureDetector());
