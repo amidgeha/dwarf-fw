@@ -50,12 +50,10 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         gl.glDepthFunc(GL10.GL_LEQUAL);
         gl.glShadeModel(GL10.GL_SMOOTH);
         
-        if(scene != null) {
-        	if(use_vbos) {
-    			// TODO messy...
-    			scene.forgetHardwareBuffers();
-    			scene.generateHardwareBuffers(gl);
-    		}
+        if(scene != null && use_vbos) {
+    		// TODO messy...
+    		scene.forgetHardwareBuffers();
+    		scene.generateHardwareBuffers(gl);
         }
     }
 

@@ -109,7 +109,6 @@ public class DemoGameThread extends Thread implements AnimationListener {
 	 */
 	@Override
 	public void run() {
-		mGLView.getRenderer().useVBOs(true);
 		createWorld();
 		mGLView.getRenderer().setCamera(camList[iCam]);
 		mGLView.getRenderer().setScene(world);
