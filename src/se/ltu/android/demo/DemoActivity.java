@@ -2,6 +2,7 @@
 package se.ltu.android.demo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,6 +21,8 @@ import android.view.WindowManager;
  */
 public class DemoActivity extends Activity {
 	private static final String TAG = "TestGL";
+	private static final boolean USE_VBOS = true;
+	private static final boolean USE_SENSORS = true;
 	private DemoGLSurfaceView mGLView;
 	private SensorManager mSensorManager;
 	private ArrayList<Sensor> sensors;
@@ -36,13 +39,21 @@ public class DemoActivity extends Activity {
         getWindow().setFlags(flags, flags);
         
         // prepare listening to sensors
-        mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-        sensors = new ArrayList<Sensor>();
-        sensors.add((mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER)).get(0));
-        sensors.add((mSensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD)).get(0));
+        if(USE_SENSORS) {
+	        mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+	        sensors = new ArrayList<Sensor>();
+	        List<Sensor> sList = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+	        if(sList.size() > 0) {
+	        	sensors.add(sList.get(0));
+	        }
+	        sList = mSensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD);
+	        if(sList.size() > 0) {
+	        	sensors.add(sList.get(0));
+	        }
+        }
         
         // set opengl view
-        mGLView = new DemoGLSurfaceView(this);
+        mGLView = new DemoGLSurfaceView(this, USE_VBOS);
         setContentView(mGLView);
         mGLView.requestFocus();
         mGLView.setRenderWhenDirty(true);
@@ -66,16 +77,20 @@ public class DemoActivity extends Activity {
         mGameThread.onResume();
         
         // register listener for each sensor in sensors
-        for (Sensor sensor : sensors) {
-			mSensorManager.registerListener(mGLView, 
-					sensor, SensorManager.SENSOR_DELAY_GAME);
-		}
+        if(USE_SENSORS) {
+	        for (Sensor sensor : sensors) {
+				mSensorManager.registerListener(mGLView, 
+						sensor, SensorManager.SENSOR_DELAY_GAME);
+			}
+        }
     }
     
     @Override
     protected void onStop() {
     	// unregister listener for all sensors
-    	mSensorManager.unregisterListener(mGLView);
+    	if(USE_SENSORS) {
+    		mSensorManager.unregisterListener(mGLView);
+    	}
         super.onStop();
         // Good place to stop method trace. See DemoGameThread.run() for a
         // good place to start a method trace after resources are loaded.
