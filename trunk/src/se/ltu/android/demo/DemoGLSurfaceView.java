@@ -15,7 +15,7 @@ import android.view.MotionEvent;
  * @version $Revision$
  * @lastmodified $Date$
  */
-class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
+public class DemoGLSurfaceView extends GLSurfaceView implements SensorEventListener {
 	private DemoRenderer mRenderer;
 	private GestureDetector mGestureDetector;
 
